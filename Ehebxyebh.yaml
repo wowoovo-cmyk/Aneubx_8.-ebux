@@ -1,4 +1,3 @@
-
 function main(config) {
   config["mixed-port"] = 7897;
   config["allow-lan"] = true;
