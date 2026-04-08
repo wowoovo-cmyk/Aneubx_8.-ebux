@@ -18,70 +18,59 @@ function main(config) {
     "store-fake-ip": false,
   };
 
-  // ========== 3. GeoX 数据源 ==========
+  // ========== 3. GeoX 数据源（与原版一致） ==========
   config["geox-url"] = {
-    geoip:   "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.dat",
-    geosite: "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geosite.dat",
-    mmdb:    "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/country.mmdb",
+    geoip:   "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.dat",
+    geosite: "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geosite.dat",
+    mmdb:    "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/country.mmdb",
     asn:     "https://github.com/xishang0128/geoip/releases/download/latest/GeoLite2-ASN.mmdb",
   };
 
-  // ========== 4. Sniffer ==========
+  // ========== 4. Sniffer（parse-pure-ip:true 是直连域名正常工作的关键） ==========
   config.sniffer = {
     enable: true,
     "parse-pure-ip": true,
     sniff: {
       HTTP:  { ports: [80, "8080-8880"], "override-destination": true },
-      TLS:   { ports: [443, 8443] },
       QUIC:  { ports: [443, 8443] },
+      TLS:   { ports: [443, 8443] },
     },
   };
 
-  // ========== 5. DNS ==========
+  // ========== 5. DNS（与原版保持一致，使用更完整的 DNS 配置） ==========
   config.dns = {
     enable: true,
     listen: "127.0.0.1:5335",
     "use-system-hosts": false,
     "enhanced-mode": "fake-ip",
     "fake-ip-range": "198.18.0.1/16",
-    "default-nameserver": ["223.5.5.5", "119.29.29.29"],
-    "proxy-server-nameserver": [
-      "223.5.5.5",
-      "119.29.29.29",
-      "https://dns.alidns.com/dns-query",
-    ],
+    "default-nameserver": ["180.76.76.76", "182.254.118.118", "8.8.8.8", "180.184.2.2"],
     nameserver: [
+      "180.76.76.76", "119.29.29.29", "180.184.1.1", "223.5.5.5", "8.8.8.8",
+      "https://223.6.6.6/dns-query#h3=true",
+      "https://dns.alidns.com/dns-query",
+      "https://cloudflare-dns.com/dns-query",
+      "https://doh.pub/dns-query",
+    ],
+    fallback: [
+      "https://000000.dns.nextdns.io/dns-query#h3=true",
       "https://dns.alidns.com/dns-query",
       "https://doh.pub/dns-query",
-      "223.5.5.5",
-      "119.29.29.29",
-    ],
-    // 优化5：fallback 只保留 DoH，去掉明文 IP，避免国内污染
-    fallback: [
-      "https://dns.google/dns-query",
+      "https://public.dns.iij.jp/dns-query",
+      "https://101.101.101.101/dns-query",
+      "https://208.67.220.220/dns-query",
+      "tls://8.8.4.4",
+      "tls://1.0.0.1:853",
       "https://cloudflare-dns.com/dns-query",
+      "https://dns.google/dns-query",
     ],
     "fallback-filter": {
       geoip: true,
-      "geoip-code": "CN",
       ipcidr: ["240.0.0.0/4", "0.0.0.0/32", "127.0.0.1/32"],
       domain: [
         "+.google.com", "+.facebook.com", "+.twitter.com", "+.youtube.com",
         "+.xn--ngstr-lra8j.com", "+.google.cn", "+.googleapis.cn",
-        "+.googleapis.com", "+.gvt1.com", "+.telegram.org", "+.github.com",
-        "+.openai.com", "+.anthropic.com",
-      ],
-    },
-    "nameserver-policy": {
-      "geosite:cn,private,geolocation-cn": [
-        "https://dns.alidns.com/dns-query",
-        "https://doh.pub/dns-query",
-        "223.5.5.5",
-        "119.29.29.29",
-      ],
-      "geosite:geolocation-!cn,google,youtube,telegram,openai,anthropic,github": [
-        "https://dns.google/dns-query",
-        "https://cloudflare-dns.com/dns-query",
+        "+.googleapis.com", "+.gvt1.com",
       ],
     },
     "fake-ip-filter": [
@@ -133,133 +122,128 @@ function main(config) {
   const usFinal    = usNodes.length    > 0 ? usNodes    : autoNodes;
   const otherFinal = otherNodes.length > 0 ? otherNodes : autoNodes;
 
-  // ========== 7. 代理组 ==========
+  // 所有功能组可用的选项列表
+  const fullProxies = ["节点选择", "自动选择", "DIRECT", "REJECT", "香港", "台湾", "日本", "新加坡", "美国", "其他地区"];
+
+  // ========== 7. 代理组（结构与原版一致） ==========
   config["proxy-groups"] = [
-    { name: "手动选择", type: "select",   proxies: ["自动选择", "DIRECT", "REJECT", "香港", "台湾", "日本", "新加坡", "美国", "其他地区", ...autoNodes] },
-    // 优化2：自动选择 interval 改为 600 秒，响应节点质量变化更及时
-    { name: "自动选择", type: "url-test", proxies: autoNodes,  url: "https://www.gstatic.com/generate_204", interval: 600, tolerance: 150, lazy: true },
-    { name: "香港",     type: "url-test", proxies: hkFinal,    url: "https://www.gstatic.com/generate_204", interval: 600, tolerance: 100, lazy: false },
-    { name: "台湾",     type: "url-test", proxies: twFinal,    url: "https://www.gstatic.com/generate_204", interval: 600, tolerance: 100, lazy: false },
-    { name: "日本",     type: "url-test", proxies: jpFinal,    url: "https://www.gstatic.com/generate_204", interval: 600, tolerance: 100, lazy: false },
-    { name: "新加坡",   type: "url-test", proxies: sgFinal,    url: "https://www.gstatic.com/generate_204", interval: 600, tolerance: 100, lazy: false },
-    { name: "美国",     type: "url-test", proxies: usFinal,    url: "https://www.gstatic.com/generate_204", interval: 600, tolerance: 100, lazy: false },
-    // 优化1：其他地区改为 lazy:true，不常用时不持续后台测速
-    { name: "其他地区", type: "url-test", proxies: otherFinal, url: "https://www.gstatic.com/generate_204", interval: 600, tolerance: 100, lazy: true },
-    { name: "广告拦截", type: "select", proxies: ["REJECT", "DIRECT", "手动选择"] },
-    { name: "人工智能", type: "select", proxies: ["手动选择", "自动选择", "台湾", "美国", "日本", "新加坡", "DIRECT", "REJECT"] },
-    { name: "YouTube",  type: "select", proxies: ["手动选择", "自动选择", "香港", "台湾", "日本", "新加坡", "美国", "DIRECT", "REJECT"] },
-    { name: "谷歌服务", type: "select", proxies: ["手动选择", "自动选择", "香港", "台湾", "日本", "新加坡", "美国", "DIRECT", "REJECT"] },
-    { name: "微软服务", type: "select", proxies: ["手动选择", "自动选择", "香港", "台湾", "日本", "新加坡", "美国", "其他地区", "DIRECT", "REJECT"] },
-    { name: "苹果服务", type: "select", proxies: ["手动选择", "自动选择", "香港", "台湾", "日本", "新加坡", "美国", "其他地区", "DIRECT", "REJECT"] },
-    { name: "Telegram", type: "select", proxies: ["手动选择", "自动选择", "香港", "新加坡", "日本", "美国", "DIRECT", "REJECT"] },
-    { name: "Netflix",  type: "select", proxies: ["手动选择", "自动选择", "香港", "台湾", "日本", "新加坡", "美国", "REJECT"] },
-    { name: "开发平台", type: "select", proxies: ["手动选择", "自动选择", "香港", "台湾", "日本", "新加坡", "美国", "其他地区", "DIRECT", "REJECT"] },
-    { name: "内网直连", type: "select", proxies: ["DIRECT", "REJECT", "手动选择"] },
-    { name: "国内直连", type: "select", proxies: ["DIRECT", "REJECT", "手动选择"] },
-    { name: "全球代理", type: "select", proxies: ["手动选择", "自动选择", "香港", "台湾", "日本", "新加坡", "美国", "其他地区", "DIRECT", "REJECT"] },
-    { name: "最终规则", type: "select", proxies: ["手动选择", "自动选择", "DIRECT", "REJECT"] },
+    { name: "香港",     type: "url-test", proxies: hkFinal,    url: "https://www.gstatic.com/generate_204", interval: 300, tolerance: 100, lazy: false },
+    { name: "台湾",     type: "url-test", proxies: twFinal,    url: "https://www.gstatic.com/generate_204", interval: 300, tolerance: 100, lazy: false },
+    { name: "日本",     type: "url-test", proxies: jpFinal,    url: "https://www.gstatic.com/generate_204", interval: 300, tolerance: 100, lazy: false },
+    { name: "新加坡",   type: "url-test", proxies: sgFinal,    url: "https://www.gstatic.com/generate_204", interval: 300, tolerance: 100, lazy: false },
+    { name: "美国",     type: "url-test", proxies: usFinal,    url: "https://www.gstatic.com/generate_204", interval: 300, tolerance: 100, lazy: false },
+    { name: "其他地区", type: "url-test", proxies: otherFinal, url: "https://www.gstatic.com/generate_204", interval: 300, tolerance: 100, lazy: true },
+    { name: "自动选择", type: "url-test", proxies: autoNodes,  url: "https://www.gstatic.com/generate_204", interval: 600, tolerance: 150, lazy: false },
+    { name: "节点选择", type: "select",   proxies: ["自动选择", "DIRECT", "REJECT", "香港", "台湾", "日本", "新加坡", "美国", "其他地区", ...autoNodes] },
+    { name: "广告拦截", type: "select",   proxies: ["REJECT", "DIRECT", "节点选择"] },
+    { name: "AI 服务",  type: "select",   proxies: fullProxies },
+    { name: "油管视频", type: "select",   proxies: fullProxies },
+    { name: "谷歌服务", type: "select",   proxies: fullProxies },
+    { name: "微软服务", type: "select",   proxies: fullProxies },
+    { name: "苹果服务", type: "select",   proxies: fullProxies },
+    { name: "电报消息", type: "select",   proxies: ["新加坡", "香港", "节点选择", "自动选择", "DIRECT", "REJECT", "美国", "日本", "台湾", "其他地区"] },
+    { name: "奈飞",     type: "select",   proxies: fullProxies },
+    { name: "代码托管", type: "select",   proxies: fullProxies },
+    { name: "私有网络", type: "select",   proxies: ["DIRECT", "REJECT", "节点选择", ...fullProxies.slice(2)] },
+    // 关键：国内服务默认 DIRECT，自定义 Emby 域名指向此分组即可在代理开启时正常直连
+    { name: "国内服务", type: "select",   proxies: ["DIRECT", "REJECT", "节点选择", ...fullProxies.slice(2)] },
+    { name: "非中国",   type: "select",   proxies: fullProxies },
+    { name: "漏网之鱼", type: "select",   proxies: fullProxies },
   ];
 
-  // ========== 8. 规则集 ==========
-  const CDN = "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo";
+  // ========== 8. 规则集（使用 testingcf CDN，与原版一致） ==========
+  const GH = "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo";
   config["rule-providers"] = {
-    // 广告拦截（12小时更新）
+    // 广告拦截（12小时更新，国内专项）
     "anti-ad": {
       type: "http", behavior: "domain", format: "yaml", interval: 43200,
       path: "./ruleset/anti-ad.yaml",
-      url: "https://fastly.jsdelivr.net/gh/privacy-protection-tools/anti-AD@master/anti-ad-clash.yaml",
+      url: "https://testingcf.jsdelivr.net/gh/privacy-protection-tools/anti-AD@master/anti-ad-clash.yaml",
     },
     "AWAvenue-Ads": {
       type: "http", behavior: "domain", format: "yaml", interval: 43200,
       path: "./ruleset/AWAvenue-Ads.yaml",
-      url: "https://fastly.jsdelivr.net/gh/TG-Twilight/AWAvenue-Ads-Rule@main/Clash/AWAvenue-Ads-Rule-Clash.yaml",
+      url: "https://testingcf.jsdelivr.net/gh/TG-Twilight/AWAvenue-Ads-Rule@main/Clash/AWAvenue-Ads-Rule-Clash.yaml",
     },
-    "category-ads-all":     { type: "http", behavior: "domain",  format: "mrs", interval: 172800, path: "./ruleset/category-ads-all.mrs",     url: `${CDN}/geosite/category-ads-all.mrs` },
-    // 基础
-    "115":                  { type: "http", behavior: "domain",  format: "mrs", interval: 172800, path: "./ruleset/115.mrs",                  url: `${CDN}/geosite/115.mrs` },
-    "private":              { type: "http", behavior: "domain",  format: "mrs", interval: 172800, path: "./ruleset/private.mrs",              url: `${CDN}/geosite/private.mrs` },
-    "private-ip":           { type: "http", behavior: "ipcidr",  format: "mrs", interval: 172800, path: "./ruleset/private-ip.mrs",           url: `${CDN}/geoip/private.mrs` },
-    "geolocation-cn":       { type: "http", behavior: "domain",  format: "mrs", interval: 172800, path: "./ruleset/geolocation-cn.mrs",       url: `${CDN}/geosite/geolocation-cn.mrs` },
-    "cn-ip":                { type: "http", behavior: "ipcidr",  format: "mrs", interval: 172800, path: "./ruleset/cn-ip.mrs",                url: `${CDN}/geoip/cn.mrs` },
-    "googlefcm":            { type: "http", behavior: "domain",  format: "mrs", interval: 172800, path: "./ruleset/googlefcm.mrs",            url: `${CDN}/geosite/googlefcm.mrs` },
-    "googlefcm@!cn":        { type: "http", behavior: "domain",  format: "mrs", interval: 172800, path: "./ruleset/googlefcm@!cn.mrs",        url: `${CDN}/geosite/googlefcm@!cn.mrs` },
-    "geolocation-!cn":      { type: "http", behavior: "domain",  format: "mrs", interval: 172800, path: "./ruleset/geolocation-!cn.mrs",      url: `${CDN}/geosite/geolocation-!cn.mrs` },
-    // AI
-    "category-ai-chat-!cn": { type: "http", behavior: "domain",  format: "mrs", interval: 172800, path: "./ruleset/category-ai-chat-!cn.mrs", url: `${CDN}/geosite/category-ai-chat-!cn.mrs` },
-    "openai":               { type: "http", behavior: "domain",  format: "mrs", interval: 172800, path: "./ruleset/openai.mrs",               url: `${CDN}/geosite/openai.mrs` },
-    "anthropic":            { type: "http", behavior: "domain",  format: "mrs", interval: 172800, path: "./ruleset/anthropic.mrs",            url: `${CDN}/geosite/anthropic.mrs` },
-    "google-gemini":        { type: "http", behavior: "domain",  format: "mrs", interval: 172800, path: "./ruleset/google-gemini.mrs",        url: `${CDN}/geosite/google-gemini.mrs` },
-    "perplexity":           { type: "http", behavior: "domain",  format: "mrs", interval: 172800, path: "./ruleset/perplexity.mrs",           url: `${CDN}/geosite/perplexity.mrs` },
-    // 平台
-    "youtube":              { type: "http", behavior: "domain",  format: "mrs", interval: 172800, path: "./ruleset/youtube.mrs",              url: `${CDN}/geosite/youtube.mrs` },
-    "google":               { type: "http", behavior: "domain",  format: "mrs", interval: 172800, path: "./ruleset/google.mrs",               url: `${CDN}/geosite/google.mrs` },
-    "google-ip":            { type: "http", behavior: "ipcidr",  format: "mrs", interval: 172800, path: "./ruleset/google-ip.mrs",            url: `${CDN}/geoip/google.mrs` },
-    "microsoft":            { type: "http", behavior: "domain",  format: "mrs", interval: 172800, path: "./ruleset/microsoft.mrs",            url: `${CDN}/geosite/microsoft.mrs` },
-    "onedrive":             { type: "http", behavior: "domain",  format: "mrs", interval: 172800, path: "./ruleset/onedrive.mrs",             url: `${CDN}/geosite/onedrive.mrs` },
-    "apple":                { type: "http", behavior: "domain",  format: "mrs", interval: 172800, path: "./ruleset/apple.mrs",                url: `${CDN}/geosite/apple.mrs` },
-    "icloud":               { type: "http", behavior: "domain",  format: "mrs", interval: 172800, path: "./ruleset/icloud.mrs",               url: `${CDN}/geosite/icloud.mrs` },
-    "telegram":             { type: "http", behavior: "domain",  format: "mrs", interval: 172800, path: "./ruleset/telegram.mrs",             url: `${CDN}/geosite/telegram.mrs` },
-    "telegram-ip":          { type: "http", behavior: "ipcidr",  format: "mrs", interval: 172800, path: "./ruleset/telegram-ip.mrs",          url: `${CDN}/geoip/telegram.mrs` },
-    "netflix":              { type: "http", behavior: "domain",  format: "mrs", interval: 172800, path: "./ruleset/netflix.mrs",              url: `${CDN}/geosite/netflix.mrs` },
-    "netflix-ip":           { type: "http", behavior: "ipcidr",  format: "mrs", interval: 172800, path: "./ruleset/netflix-ip.mrs",           url: `${CDN}/geoip/netflix.mrs` },
-    "github":               { type: "http", behavior: "domain",  format: "mrs", interval: 172800, path: "./ruleset/github.mrs",               url: `${CDN}/geosite/github.mrs` },
-    "gitlab":               { type: "http", behavior: "domain",  format: "mrs", interval: 172800, path: "./ruleset/gitlab.mrs",               url: `${CDN}/geosite/gitlab.mrs` },
-    "atlassian":            { type: "http", behavior: "domain",  format: "mrs", interval: 172800, path: "./ruleset/atlassian.mrs",            url: `${CDN}/geosite/atlassian.mrs` },
-    // 优化3：去掉 cn（geolocation-cn 已覆盖大部分，减少一次规则集加载）
-    "cn-ip-final":          { type: "http", behavior: "ipcidr",  format: "mrs", interval: 172800, path: "./ruleset/cn-ip.mrs",                url: `${CDN}/geoip/cn.mrs` },
+    "category-ads-all":     { type: "http", behavior: "domain",  format: "mrs", interval: 86400, path: "./ruleset/category-ads-all.mrs",     url: `${GH}/geosite/category-ads-all.mrs` },
+    "private":              { type: "http", behavior: "domain",  format: "mrs", interval: 86400, path: "./ruleset/private.mrs",              url: `${GH}/geosite/private.mrs` },
+    "private-ip":           { type: "http", behavior: "ipcidr",  format: "mrs", interval: 86400, path: "./ruleset/private-ip.mrs",           url: `${GH}/geoip/private.mrs` },
+    "geolocation-cn":       { type: "http", behavior: "domain",  format: "mrs", interval: 86400, path: "./ruleset/geolocation-cn.mrs",       url: `${GH}/geosite/geolocation-cn.mrs` },
+    "cn-ip":                { type: "http", behavior: "ipcidr",  format: "mrs", interval: 86400, path: "./ruleset/cn-ip.mrs",                url: `${GH}/geoip/cn.mrs` },
+    "googlefcm":            { type: "http", behavior: "domain",  format: "mrs", interval: 86400, path: "./ruleset/googlefcm.mrs",            url: `${GH}/geosite/googlefcm.mrs` },
+    "googlefcm@!cn":        { type: "http", behavior: "domain",  format: "mrs", interval: 86400, path: "./ruleset/googlefcm@!cn.mrs",        url: `${GH}/geosite/googlefcm@!cn.mrs` },
+    "geolocation-!cn":      { type: "http", behavior: "domain",  format: "mrs", interval: 86400, path: "./ruleset/geolocation-!cn.mrs",      url: `${GH}/geosite/geolocation-!cn.mrs` },
+    "category-ai-chat-!cn": { type: "http", behavior: "domain",  format: "mrs", interval: 86400, path: "./ruleset/category-ai-chat-!cn.mrs", url: `${GH}/geosite/category-ai-chat-!cn.mrs` },
+    "openai":               { type: "http", behavior: "domain",  format: "mrs", interval: 86400, path: "./ruleset/openai.mrs",               url: `${GH}/geosite/openai.mrs` },
+    "anthropic":            { type: "http", behavior: "domain",  format: "mrs", interval: 86400, path: "./ruleset/anthropic.mrs",            url: `${GH}/geosite/anthropic.mrs` },
+    "google-gemini":        { type: "http", behavior: "domain",  format: "mrs", interval: 86400, path: "./ruleset/google-gemini.mrs",        url: `${GH}/geosite/google-gemini.mrs` },
+    "perplexity":           { type: "http", behavior: "domain",  format: "mrs", interval: 86400, path: "./ruleset/perplexity.mrs",           url: `${GH}/geosite/perplexity.mrs` },
+    "youtube":              { type: "http", behavior: "domain",  format: "mrs", interval: 86400, path: "./ruleset/youtube.mrs",              url: `${GH}/geosite/youtube.mrs` },
+    "google":               { type: "http", behavior: "domain",  format: "mrs", interval: 86400, path: "./ruleset/google.mrs",               url: `${GH}/geosite/google.mrs` },
+    "google-ip":            { type: "http", behavior: "ipcidr",  format: "mrs", interval: 86400, path: "./ruleset/google-ip.mrs",            url: `${GH}/geoip/google.mrs` },
+    "microsoft":            { type: "http", behavior: "domain",  format: "mrs", interval: 86400, path: "./ruleset/microsoft.mrs",            url: `${GH}/geosite/microsoft.mrs` },
+    "onedrive":             { type: "http", behavior: "domain",  format: "mrs", interval: 86400, path: "./ruleset/onedrive.mrs",             url: `${GH}/geosite/onedrive.mrs` },
+    "apple":                { type: "http", behavior: "domain",  format: "mrs", interval: 86400, path: "./ruleset/apple.mrs",                url: `${GH}/geosite/apple.mrs` },
+    "icloud":               { type: "http", behavior: "domain",  format: "mrs", interval: 86400, path: "./ruleset/icloud.mrs",               url: `${GH}/geosite/icloud.mrs` },
+    "telegram":             { type: "http", behavior: "domain",  format: "mrs", interval: 86400, path: "./ruleset/telegram.mrs",             url: `${GH}/geosite/telegram.mrs` },
+    "telegram-ip":          { type: "http", behavior: "ipcidr",  format: "mrs", interval: 86400, path: "./ruleset/telegram-ip.mrs",          url: `${GH}/geoip/telegram.mrs` },
+    "netflix":              { type: "http", behavior: "domain",  format: "mrs", interval: 86400, path: "./ruleset/netflix.mrs",              url: `${GH}/geosite/netflix.mrs` },
+    "netflix-ip":           { type: "http", behavior: "ipcidr",  format: "mrs", interval: 86400, path: "./ruleset/netflix-ip.mrs",           url: `${GH}/geoip/netflix.mrs` },
+    "github":               { type: "http", behavior: "domain",  format: "mrs", interval: 86400, path: "./ruleset/github.mrs",               url: `${GH}/geosite/github.mrs` },
+    "gitlab":               { type: "http", behavior: "domain",  format: "mrs", interval: 86400, path: "./ruleset/gitlab.mrs",               url: `${GH}/geosite/gitlab.mrs` },
+    "atlassian":            { type: "http", behavior: "domain",  format: "mrs", interval: 86400, path: "./ruleset/atlassian.mrs",            url: `${GH}/geosite/atlassian.mrs` },
+    "cn":                   { type: "http", behavior: "domain",  format: "mrs", interval: 86400, path: "./ruleset/cn.mrs",                   url: `${GH}/geosite/cn.mrs` },
+    "115":                  { type: "http", behavior: "domain",  format: "mrs", interval: 86400, path: "./ruleset/115.mrs",                  url: `${GH}/geosite/115.mrs` },
   };
 
-  // ========== 9. 路由规则 ==========
+  // ========== 9. 路由规则（与原版规则顺序一致，自定义域名指向国内服务分组） ==========
   config.rules = [
-    // 广告拦截（三层叠加：国内专项 + 秋风 + 通用）
+    // 广告拦截
     "RULE-SET,anti-ad,广告拦截",
     "RULE-SET,AWAvenue-Ads,广告拦截",
     "RULE-SET,category-ads-all,广告拦截",
+    // 自定义直连域名（指向国内服务分组，与原版一致）
+    "DOMAIN,mtalk-dev.google.com,国内服务",
+    "DOMAIN,mtalk-staging.google.com,国内服务",
+    "DOMAIN,67982.eu.cc,国内服务",
+    "DOMAIN,emby.67982.eu.cc,国内服务",
+    "DOMAIN,auto.dolby.dpdns.org,国内服务",
+    "DOMAIN,emby.4348663.xyz,国内服务",
+    "DOMAIN,emby.sadchicktv.com,国内服务",
+    "DOMAIN,saodu6.cn,国内服务",
+    "DOMAIN,2.66990000.xyz,国内服务",
+    "DOMAIN,xxm.kingemby.xyz,国内服务",
+    "DOMAIN,emo1.525778.xyz,国内服务",
+    "DOMAIN-KEYWORD,miraiemby.com,国内服务",
+    "DOMAIN-KEYWORD,tyemby.klplay,国内服务",
+    "DOMAIN-KEYWORD,dayimakk.sharepoint,国内服务",
+    "DOMAIN-KEYWORD,mtalk.google,国内服务",
+    "DOMAIN-KEYWORD,theluyuan.com,国内服务",
+    "DOMAIN-KEYWORD,ey.626258,国内服务",
+    "DOMAIN-SUFFIX,embymv.link,国内服务",
+    "DOMAIN-SUFFIX,emby.my,国内服务",
+    "DOMAIN-SUFFIX,8880080.xyz,国内服务",
+    "DOMAIN-SUFFIX,api-huacloud.dev,国内服务",
     // AI 服务
-    "RULE-SET,category-ai-chat-!cn,人工智能",
-    "RULE-SET,openai,人工智能",
-    "RULE-SET,anthropic,人工智能",
-    "RULE-SET,google-gemini,人工智能",
-    "RULE-SET,perplexity,人工智能",
-    // 内网
-    "RULE-SET,private,内网直连",
-    "RULE-SET,private-ip,内网直连,no-resolve",
-    // 自定义直连域名（parse-pure-ip:true 保证 fake-ip 模式下 DIRECT 正常工作）
-    "DOMAIN,mtalk-dev.google.com,DIRECT",
-    "DOMAIN,mtalk-staging.google.com,DIRECT",
-    "DOMAIN,67982.eu.cc,DIRECT",
-    "DOMAIN,emby.67982.eu.cc,DIRECT",
-    "DOMAIN,auto.dolby.dpdns.org,DIRECT",
-    "DOMAIN,emby.4348663.xyz,DIRECT",
-    "DOMAIN,emby.sadchicktv.com,DIRECT",
-    "DOMAIN,saodu6.cn,DIRECT",
-    "DOMAIN,2.66990000.xyz,DIRECT",
-    "DOMAIN,xxm.kingemby.xyz,DIRECT",
-    "DOMAIN,emo1.525778.xyz,DIRECT",
-    "DOMAIN-KEYWORD,miraiemby.com,DIRECT",
-    "DOMAIN-KEYWORD,tyemby.klplay,DIRECT",
-    "DOMAIN-KEYWORD,dayimakk.sharepoint,DIRECT",
-    "DOMAIN-KEYWORD,mtalk.google,DIRECT",
-    "DOMAIN-KEYWORD,theluyuan.com,DIRECT",
-    "DOMAIN-KEYWORD,ey.626258,DIRECT",
-    "DOMAIN-SUFFIX,embymv.link,DIRECT",
-    "DOMAIN-SUFFIX,emby.my,DIRECT",
-    "DOMAIN-SUFFIX,8880080.xyz,DIRECT",
-    "DOMAIN-SUFFIX,api-huacloud.dev,DIRECT",
-    // 流媒体 & 平台
-    "RULE-SET,youtube,YouTube",
+    "RULE-SET,category-ai-chat-!cn,AI 服务",
+    "RULE-SET,openai,AI 服务",
+    "RULE-SET,anthropic,AI 服务",
+    "RULE-SET,google-gemini,AI 服务",
+    "RULE-SET,perplexity,AI 服务",
+    // 流媒体
+    "RULE-SET,youtube,油管视频",
     "RULE-SET,google,谷歌服务",
     "RULE-SET,google-ip,谷歌服务,no-resolve",
-    "RULE-SET,github,开发平台",
-    "RULE-SET,gitlab,开发平台",
-    "RULE-SET,atlassian,开发平台",
-    "RULE-SET,microsoft,微软服务",
-    "RULE-SET,onedrive,微软服务",
-    "RULE-SET,apple,苹果服务",
-    "RULE-SET,icloud,苹果服务",
-    "RULE-SET,netflix,Netflix",
-    "RULE-SET,netflix-ip,Netflix,no-resolve",
-    // 自定义 IP 路由（ASN 归属地分流）
+    // 内网
+    "RULE-SET,private,私有网络",
+    "RULE-SET,private-ip,私有网络,no-resolve",
+    // 国内
+    "RULE-SET,geolocation-cn,国内服务",
+    "RULE-SET,cn-ip,国内服务,no-resolve",
+    "RULE-SET,googlefcm,国内服务",
+    "RULE-SET,googlefcm@!cn,国内服务",
+    "RULE-SET,115,国内服务",
+    // Telegram IP
     "IP-ASN,44907,新加坡",
     "IP-ASN,62014,新加坡",
     "IP-ASN,59930,美国",
@@ -267,34 +251,38 @@ function main(config) {
     "IP-ASN,211157,香港",
     "IP-CIDR,5.28.192.0/18,香港,no-resolve",
     "IP-CIDR,109.239.140.0/24,香港,no-resolve",
-    // Telegram IP
-    "IP-CIDR,149.154.175.0/22,Telegram,no-resolve",
-    "IP-CIDR,149.154.167.0/22,Telegram,no-resolve",
-    "IP-CIDR,149.154.168.0/22,Telegram,no-resolve",
-    "IP-CIDR,149.154.172.0/22,Telegram,no-resolve",
-    "IP-CIDR,91.108.56.0/22,Telegram,no-resolve",
-    "IP-CIDR,91.108.4.0/22,Telegram,no-resolve",
-    "IP-CIDR,91.108.8.0/22,Telegram,no-resolve",
-    "IP-CIDR,91.108.12.0/22,Telegram,no-resolve",
-    "IP-CIDR,91.108.16.0/22,Telegram,no-resolve",
-    "IP-CIDR,91.105.192.0/23,Telegram,no-resolve",
-    "IP-CIDR,185.76.151.0/24,Telegram,no-resolve",
-    "IP-CIDR6,2001:b28:f23d::/48,Telegram,no-resolve",
-    "IP-CIDR6,2001:b28:f23f::/48,Telegram,no-resolve",
-    "IP-CIDR6,2001:67c:4e8::/48,Telegram,no-resolve",
-    "IP-CIDR6,2001:b28:f22a::/48,Telegram,no-resolve",
-    "RULE-SET,telegram,Telegram",
-    "RULE-SET,telegram-ip,Telegram,no-resolve",
-    // 国内
-    "RULE-SET,geolocation-cn,国内直连",
-    "RULE-SET,cn-ip,国内直连,no-resolve",
-    "RULE-SET,googlefcm,国内直连",
-    // 优化9：googlefcm@!cn 改为国内直连，FCM 推送走代理会影响 Android 消息到达率
-    "RULE-SET,googlefcm@!cn,国内直连",
-    "RULE-SET,115,国内直连",
+    "IP-CIDR,149.154.175.0/22,电报消息,no-resolve",
+    "IP-CIDR,149.154.167.0/22,电报消息,no-resolve",
+    "IP-CIDR,149.154.168.0/22,电报消息,no-resolve",
+    "IP-CIDR,149.154.172.0/22,电报消息,no-resolve",
+    "IP-CIDR,91.108.56.0/22,电报消息,no-resolve",
+    "IP-CIDR,91.108.4.0/22,电报消息,no-resolve",
+    "IP-CIDR,91.108.8.0/22,电报消息,no-resolve",
+    "IP-CIDR,91.108.12.0/22,电报消息,no-resolve",
+    "IP-CIDR,91.108.16.0/22,电报消息,no-resolve",
+    "IP-CIDR,91.105.192.0/23,电报消息,no-resolve",
+    "IP-CIDR,185.76.151.0/24,电报消息,no-resolve",
+    "IP-CIDR6,2001:b28:f23d::/48,电报消息,no-resolve",
+    "IP-CIDR6,2001:b28:f23f::/48,电报消息,no-resolve",
+    "IP-CIDR6,2001:67c:4e8::/48,电报消息,no-resolve",
+    "IP-CIDR6,2001:b28:f22a::/48,电报消息,no-resolve",
+    "RULE-SET,telegram,电报消息",
+    "RULE-SET,telegram-ip,电报消息,no-resolve",
+    // 平台
+    "RULE-SET,github,代码托管",
+    "RULE-SET,gitlab,代码托管",
+    "RULE-SET,atlassian,代码托管",
+    "RULE-SET,microsoft,微软服务",
+    "RULE-SET,onedrive,微软服务",
+    "RULE-SET,apple,苹果服务",
+    "RULE-SET,icloud,苹果服务",
+    "RULE-SET,netflix,奈飞",
+    "RULE-SET,netflix-ip,奈飞,no-resolve",
+    // 国内兜底
+    "RULE-SET,cn,国内服务",
     // 兜底
-    "RULE-SET,geolocation-!cn,全球代理",
-    "MATCH,最终规则",
+    "RULE-SET,geolocation-!cn,非中国",
+    "MATCH,漏网之鱼",
   ];
 
   return config;
