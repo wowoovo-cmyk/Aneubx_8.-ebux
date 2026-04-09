@@ -1,5 +1,7 @@
 function main(config) {
   // ========== 1. 基础设置 ==========
+  config["external-controller"] = "127.0.0.1:9090";
+  config["secret"] = ""; // 可选，Dashboard 登录密码
   config["mixed-port"] = 7897;
   config["allow-lan"] = true;
   config["mode"] = "rule";
