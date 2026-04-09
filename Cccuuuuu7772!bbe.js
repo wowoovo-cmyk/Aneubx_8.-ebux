@@ -1,11 +1,10 @@
 function main(config) {
-  // ========== 1. 基础设置 ==========
   config["external-controller"] = "127.0.0.1:9090";
-  config["secret"] = ""; // 可选，Dashboard 登录密码
+  config["secret"] = "";
   config["mixed-port"] = 7897;
   config["allow-lan"] = true;
   config["mode"] = "rule";
-  config["log-level"] = "info";
+  config["log-level"] = "warning";
   config["unified-delay"] = true;
   config["tcp-concurrent"] = true;
   config["find-process-mode"] = "strict";
@@ -14,13 +13,11 @@ function main(config) {
   config["geodata-loader"] = "standard";
   config["geo-update-interval"] = 24;
 
-  // ========== 2. Profile ==========
   config.profile = {
     "store-selected": true,
     "store-fake-ip": false,
   };
 
-  // ========== 3. GeoX 数据源（与原版一致） ==========
   config["geox-url"] = {
     geoip:   "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.dat",
     geosite: "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geosite.dat",
@@ -28,7 +25,6 @@ function main(config) {
     asn:     "https://github.com/xishang0128/geoip/releases/download/latest/GeoLite2-ASN.mmdb",
   };
 
-  // ========== 4. Sniffer（parse-pure-ip:true 是直连域名正常工作的关键） ==========
   config.sniffer = {
     enable: true,
     "parse-pure-ip": true,
@@ -39,7 +35,6 @@ function main(config) {
     },
   };
 
-  // ========== 5. DNS（与原版保持一致，使用更完整的 DNS 配置） ==========
   config.dns = {
     enable: true,
     listen: "127.0.0.1:5335",
@@ -96,10 +91,12 @@ function main(config) {
       "localhost.ptlogin2.qq.com", "*.*.*.srv.nintendo.net", "*.*.stun.playstation.net",
       "xbox.*.*.microsoft.com", "*.ipv6.microsoft.com", "*.*.xboxlive.com",
       "speedtest.cros.wr.pvp.net",
+      "mtalk.google.com",
+      "mtalk-dev.google.com",
+      "mtalk-staging.google.com",
     ],
   };
 
-  // ========== 6. 节点筛选 ==========
   const allProxies = (config.proxies || []).map((p) => p.name);
   const junkFilter = /免费|free|下载专用|剩余|流量|到期|expire|test|trial|体验|0\.0|x0\.|套餐|重置|公告|官网|频道/i;
   const cleanProxies = allProxies.filter((n) => !junkFilter.test(n));
@@ -116,7 +113,6 @@ function main(config) {
   const usNodes    = filterNodes(/美|us|unitedstates|united.states/i);
   const otherNodes = filterNodes(/韩|kr|korea|德|英|法|俄|土|印|加|澳|马|阿|fr|de|uk|gb|ru|tr|in|ca|au|my|ar/i);
 
-  // 空数组保护
   const hkFinal    = hkNodes.length    > 0 ? hkNodes    : autoNodes;
   const twFinal    = twNodes.length    > 0 ? twNodes    : autoNodes;
   const jpFinal    = jpNodes.length    > 0 ? jpNodes    : autoNodes;
@@ -124,20 +120,12 @@ function main(config) {
   const usFinal    = usNodes.length    > 0 ? usNodes    : autoNodes;
   const otherFinal = otherNodes.length > 0 ? otherNodes : autoNodes;
 
-  // 所有功能组可用的选项列表
-  const fullProxies = ["节点选择", "自动选择", "DIRECT", "REJECT", "香港", "台湾", "日本", "新加坡", "美国", "其他地区"];
+  const fullProxies   = ["节点选择", "自动选择", "DIRECT", "REJECT", "香港", "台湾", "日本", "新加坡", "美国", "其他地区"];
+  const regionProxies = ["香港", "台湾", "日本", "新加坡", "美国", "其他地区"];
 
-  // ========== 7. 代理组（结构与原版一致） ==========
   config["proxy-groups"] = [
-    { name: "香港",     type: "url-test", proxies: hkFinal,    url: "https://www.gstatic.com/generate_204", interval: 300, tolerance: 100, lazy: false },
-    { name: "台湾",     type: "url-test", proxies: twFinal,    url: "https://www.gstatic.com/generate_204", interval: 300, tolerance: 100, lazy: false },
-    { name: "日本",     type: "url-test", proxies: jpFinal,    url: "https://www.gstatic.com/generate_204", interval: 300, tolerance: 100, lazy: false },
-    { name: "新加坡",   type: "url-test", proxies: sgFinal,    url: "https://www.gstatic.com/generate_204", interval: 300, tolerance: 100, lazy: false },
-    { name: "美国",     type: "url-test", proxies: usFinal,    url: "https://www.gstatic.com/generate_204", interval: 300, tolerance: 100, lazy: false },
-    { name: "其他地区", type: "url-test", proxies: otherFinal, url: "https://www.gstatic.com/generate_204", interval: 300, tolerance: 100, lazy: true },
-    { name: "自动选择", type: "url-test", proxies: autoNodes,  url: "https://www.gstatic.com/generate_204", interval: 600, tolerance: 150, lazy: false },
-    { name: "节点选择", type: "select",   proxies: ["自动选择", "DIRECT", "REJECT", "香港", "台湾", "日本", "新加坡", "美国", "其他地区", ...autoNodes] },
-    { name: "广告拦截", type: "select",   proxies: ["REJECT", "DIRECT", "节点选择"] },
+    { name: "节点选择", type: "select",   proxies: ["自动选择", "DIRECT", "REJECT", ...regionProxies, ...autoNodes] },
+    { name: "自动选择", type: "url-test", proxies: autoNodes,  url: "http://www.qualcomm.cn/generate_204", interval: 600, tolerance: 50, lazy: false },
     { name: "AI 服务",  type: "select",   proxies: fullProxies },
     { name: "油管视频", type: "select",   proxies: fullProxies },
     { name: "谷歌服务", type: "select",   proxies: fullProxies },
@@ -146,27 +134,23 @@ function main(config) {
     { name: "电报消息", type: "select",   proxies: ["新加坡", "香港", "节点选择", "自动选择", "DIRECT", "REJECT", "美国", "日本", "台湾", "其他地区"] },
     { name: "奈飞",     type: "select",   proxies: fullProxies },
     { name: "代码托管", type: "select",   proxies: fullProxies },
-    { name: "私有网络", type: "select",   proxies: ["DIRECT", "REJECT", "节点选择", ...fullProxies.slice(2)] },
-    // 关键：国内服务默认 DIRECT，自定义 Emby 域名指向此分组即可在代理开启时正常直连
-    { name: "国内服务", type: "select",   proxies: ["DIRECT", "REJECT", "节点选择", ...fullProxies.slice(2)] },
+    { name: "广告拦截", type: "select",   proxies: ["REJECT", "DIRECT", "节点选择"] },
+    { name: "私有网络", type: "select",   proxies: ["DIRECT", "REJECT", "节点选择", ...regionProxies] },
+    { name: "国内服务", type: "select",   proxies: ["DIRECT", "REJECT", "节点选择", ...regionProxies] },
     { name: "非中国",   type: "select",   proxies: fullProxies },
     { name: "漏网之鱼", type: "select",   proxies: fullProxies },
+    { name: "香港",     type: "url-test", proxies: hkFinal,    url: "http://www.qualcomm.cn/generate_204", interval: 300, tolerance: 50, lazy: false },
+    { name: "台湾",     type: "url-test", proxies: twFinal,    url: "http://www.qualcomm.cn/generate_204", interval: 300, tolerance: 50, lazy: false },
+    { name: "日本",     type: "url-test", proxies: jpFinal,    url: "http://www.qualcomm.cn/generate_204", interval: 300, tolerance: 50, lazy: false },
+    { name: "新加坡",   type: "url-test", proxies: sgFinal,    url: "http://www.qualcomm.cn/generate_204", interval: 300, tolerance: 50, lazy: false },
+    { name: "美国",     type: "url-test", proxies: usFinal,    url: "http://www.qualcomm.cn/generate_204", interval: 300, tolerance: 50, lazy: false },
+    { name: "其他地区", type: "url-test", proxies: otherFinal, url: "http://www.qualcomm.cn/generate_204", interval: 300, tolerance: 50, lazy: true  },
   ];
 
-  // ========== 8. 规则集（使用 testingcf CDN，与原版一致） ==========
   const GH = "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo";
   config["rule-providers"] = {
-    // 广告拦截（12小时更新，国内专项）
-    "anti-ad": {
-      type: "http", behavior: "domain", format: "yaml", interval: 43200,
-      path: "./ruleset/anti-ad.yaml",
-      url: "https://testingcf.jsdelivr.net/gh/privacy-protection-tools/anti-AD@master/anti-ad-clash.yaml",
-    },
-    "AWAvenue-Ads": {
-      type: "http", behavior: "domain", format: "yaml", interval: 43200,
-      path: "./ruleset/AWAvenue-Ads.yaml",
-      url: "https://testingcf.jsdelivr.net/gh/TG-Twilight/AWAvenue-Ads-Rule@main/Clash/AWAvenue-Ads-Rule-Clash.yaml",
-    },
+    "anti-ad":              { type: "http", behavior: "domain", format: "yaml", interval: 43200, path: "./ruleset/anti-ad.yaml",              url: "https://testingcf.jsdelivr.net/gh/privacy-protection-tools/anti-AD@master/anti-ad-clash.yaml" },
+    "AWAvenue-Ads":         { type: "http", behavior: "domain", format: "yaml", interval: 43200, path: "./ruleset/AWAvenue-Ads.yaml",          url: "https://testingcf.jsdelivr.net/gh/TG-Twilight/AWAvenue-Ads-Rule@main/Clash/AWAvenue-Ads-Rule-Clash.yaml" },
     "category-ads-all":     { type: "http", behavior: "domain",  format: "mrs", interval: 86400, path: "./ruleset/category-ads-all.mrs",     url: `${GH}/geosite/category-ads-all.mrs` },
     "private":              { type: "http", behavior: "domain",  format: "mrs", interval: 86400, path: "./ruleset/private.mrs",              url: `${GH}/geosite/private.mrs` },
     "private-ip":           { type: "http", behavior: "ipcidr",  format: "mrs", interval: 86400, path: "./ruleset/private-ip.mrs",           url: `${GH}/geoip/private.mrs` },
@@ -198,13 +182,10 @@ function main(config) {
     "115":                  { type: "http", behavior: "domain",  format: "mrs", interval: 86400, path: "./ruleset/115.mrs",                  url: `${GH}/geosite/115.mrs` },
   };
 
-  // ========== 9. 路由规则（与原版规则顺序一致，自定义域名指向国内服务分组） ==========
   config.rules = [
-    // 广告拦截
     "RULE-SET,anti-ad,广告拦截",
     "RULE-SET,AWAvenue-Ads,广告拦截",
     "RULE-SET,category-ads-all,广告拦截",
-    // 自定义直连域名（指向国内服务分组，与原版一致）
     "DOMAIN,mtalk-dev.google.com,国内服务",
     "DOMAIN,mtalk-staging.google.com,国内服务",
     "DOMAIN,67982.eu.cc,国内服务",
@@ -226,26 +207,21 @@ function main(config) {
     "DOMAIN-SUFFIX,emby.my,国内服务",
     "DOMAIN-SUFFIX,8880080.xyz,国内服务",
     "DOMAIN-SUFFIX,api-huacloud.dev,国内服务",
-    // AI 服务
     "RULE-SET,category-ai-chat-!cn,AI 服务",
     "RULE-SET,openai,AI 服务",
     "RULE-SET,anthropic,AI 服务",
     "RULE-SET,google-gemini,AI 服务",
     "RULE-SET,perplexity,AI 服务",
-    // 流媒体
     "RULE-SET,youtube,油管视频",
     "RULE-SET,google,谷歌服务",
     "RULE-SET,google-ip,谷歌服务,no-resolve",
-    // 内网
     "RULE-SET,private,私有网络",
     "RULE-SET,private-ip,私有网络,no-resolve",
-    // 国内
     "RULE-SET,geolocation-cn,国内服务",
     "RULE-SET,cn-ip,国内服务,no-resolve",
     "RULE-SET,googlefcm,国内服务",
     "RULE-SET,googlefcm@!cn,国内服务",
     "RULE-SET,115,国内服务",
-    // Telegram IP
     "IP-ASN,44907,新加坡",
     "IP-ASN,62014,新加坡",
     "IP-ASN,59930,美国",
@@ -270,7 +246,6 @@ function main(config) {
     "IP-CIDR6,2001:b28:f22a::/48,电报消息,no-resolve",
     "RULE-SET,telegram,电报消息",
     "RULE-SET,telegram-ip,电报消息,no-resolve",
-    // 平台
     "RULE-SET,github,代码托管",
     "RULE-SET,gitlab,代码托管",
     "RULE-SET,atlassian,代码托管",
@@ -280,9 +255,7 @@ function main(config) {
     "RULE-SET,icloud,苹果服务",
     "RULE-SET,netflix,奈飞",
     "RULE-SET,netflix-ip,奈飞,no-resolve",
-    // 国内兜底
     "RULE-SET,cn,国内服务",
-    // 兜底
     "RULE-SET,geolocation-!cn,非中国",
     "MATCH,漏网之鱼",
   ];
