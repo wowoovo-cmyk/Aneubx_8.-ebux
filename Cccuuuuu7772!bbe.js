@@ -27,10 +27,8 @@ function main(config) {
   };
 
   config["hosts"] = {
-    "doh.pub": ["1.12.12.21", "1.12.12.12"],
-    "dns.google": ["8.8.8.8", "8.8.4.4"],
-    "dns.alidns.com": ["223.5.5.5", "223.6.6.6"],
-    "cloudflare-dns.com": ["1.1.1.1", "1.0.0.1"]
+    "doh.pub": ["1.12.12.21"],
+    "dns.google": ["8.8.8.8"],
   };
 
   config.sniffer = {
@@ -45,67 +43,45 @@ function main(config) {
 
   config.dns = {
     enable: true,
-    listen: "0.0.0.0:1053",
+    listen: "0.0.0.0:5353",
     ipv6: false,
-    "filter-aaaa": true,
-    "use-system-hosts": false,
     "enhanced-mode": "fake-ip",
     "fake-ip-range": "198.18.0.1/16",
-    "respect-rules": true,
-    "fake-ip-filter": [
-      "+.lan",
-      "+.local",
-      "+.msftconnecttest.com",
-      "+.msftncsi.com",
-      "localhost.ptlogin2.qq.com",
-      "time.*.com",
-      "stun.*.*",
-      "+.srv.nintendo.net",
-      "+.stun.playstation.net",
-      "+.xboxlive.com",
-      "music.163.com",
-      "+.music.163.com",
-      "+.126.net",
-      "+.kuwo.cn",
-      "+.y.qq.com",
-      "+.music.migu.cn",
-      "+.xiami.com"
-    ],
+    "cache-size": 0,
+    "prefer-h3": false,
+    "filter-aaaa": true,
     "proxy-server-nameserver": [
       "https://doh.pub/dns-query"
     ],
     nameserver: [
-      "https://doh.pub/dns-query",
-      "https://dns.alidns.com/dns-query"
+      "https://dns.google/dns-query"
     ],
     fallback: [
-      "https://dns.google/dns-query",
-      "https://cloudflare-dns.com/dns-query"
+      "https://dns.google/dns-query"
     ],
     "nameserver-policy": {
-      "geosite:cn,private": [
-        "https://doh.pub/dns-query",
-        "https://dns.alidns.com/dns-query"
-      ],
-      "geosite:geolocation-!cn": [
-        "https://dns.google/dns-query",
-        "https://cloudflare-dns.com/dns-query"
-      ]
+      "geosite:cn": "https://doh.pub/dns-query",
+      "geosite:private": "https://doh.pub/dns-query"
     },
     "fallback-filter": {
       geoip: true,
       "geoip-code": "CN",
-      ipcidr: ["240.0.0.0/4", "0.0.0.0/32", "127.0.0.1/32"],
+      ipmask: [
+        "240.0.0.0/4"
+      ],
       domain: [
         "+.google.com",
-        "+.facebook.com",
-        "+.twitter.com",
-        "+.youtube.com",
-        "+.xn--ngstr-lra8j.com",
-        "+.google.cn",
-        "+.googleapis.cn",
         "+.googleapis.com",
-        "+.gvt1.com"
+        "+.gstatic.com",
+        "+.googleusercontent.com",
+        "+.googlevideo.com",
+        "+.youtube.com",
+        "+.twitter.com",
+        "+.x.com",
+        "+.telegram.org",
+        "+.openai.com",
+        "+.chatgpt.com",
+        "+.gemini.google.com"
       ]
     }
   };
@@ -268,5 +244,6 @@ function main(config) {
     "RULE-SET,geolocation-!cn,非中国",
     "MATCH,漏网之鱼",
   ];
+
   return config;
 }
