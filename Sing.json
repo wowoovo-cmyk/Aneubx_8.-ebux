@@ -1,0 +1,411 @@
+{
+  "log": {
+    "level": "info",
+    "timestamp": true
+  },
+  "dns": {
+    "servers": [
+      {
+        "tag": "dns-cn",
+        "address": "https://doh.pub/dns-query",
+        "detour": "direct"
+      },
+      {
+        "tag": "dns-ali",
+        "address": "https://dns.alidns.com/dns-query",
+        "detour": "direct"
+      },
+      {
+        "tag": "dns-google",
+        "address": "https://dns.google/dns-query",
+        "detour": "proxy"
+      },
+      {
+        "tag": "dns-cf",
+        "address": "https://cloudflare-dns.com/dns-query",
+        "detour": "proxy"
+      },
+      {
+        "tag": "fakeip",
+        "type": "fakeip",
+        "inet4_range": "198.18.0.1/16",
+        "inet6_range": "fc00::/18"
+      }
+    ],
+    "rules": [
+      {
+        "clash_mode": "direct",
+        "server": "dns-cn"
+      },
+      {
+        "clash_mode": "global",
+        "server": "fakeip"
+      },
+      {
+        "domain_suffix": [
+          "google.com",
+          "facebook.com",
+          "twitter.com",
+          "youtube.com",
+          "xn--ngstr-lra8j.com",
+          "google.cn",
+          "googleapis.cn",
+          "googleapis.com",
+          "gvt1.com"
+        ],
+        "server": "dns-google"
+      },
+      {
+        "rule_set": ["geosite-cn", "geosite-private"],
+        "server": "dns-cn"
+      },
+      {
+        "rule_set": ["geosite-geolocation-!cn"],
+        "server": "dns-google"
+      }
+    ],
+    "final": "fakeip",
+    "independent_cache": true
+  },
+  "inbounds": [
+    {
+      "type": "mixed",
+      "tag": "mixed-in",
+      "listen": "127.0.0.1",
+      "listen_port": 7897,
+      "set_system_proxy": false
+    }
+  ],
+  "outbounds": [
+    {
+      "tag": "节点选择",
+      "type": "selector",
+      "outbounds": ["自动选择", "direct", "block", "香港", "台湾", "日本", "新加坡", "美国", "其他地区"],
+      "default": "自动选择"
+    },
+    {
+      "tag": "自动选择",
+      "type": "urltest",
+      "outbounds": [],
+      "url": "http://www.qualcomm.cn/generate_204",
+      "interval": "10m",
+      "tolerance": 50,
+      "idle_timeout": "30m"
+    },
+    {
+      "tag": "香港",
+      "type": "urltest",
+      "outbounds": [],
+      "url": "http://www.qualcomm.cn/generate_204",
+      "interval": "5m",
+      "tolerance": 50
+    },
+    {
+      "tag": "台湾",
+      "type": "urltest",
+      "outbounds": [],
+      "url": "http://www.qualcomm.cn/generate_204",
+      "interval": "5m",
+      "tolerance": 50
+    },
+    {
+      "tag": "日本",
+      "type": "urltest",
+      "outbounds": [],
+      "url": "http://www.qualcomm.cn/generate_204",
+      "interval": "5m",
+      "tolerance": 50
+    },
+    {
+      "tag": "新加坡",
+      "type": "urltest",
+      "outbounds": [],
+      "url": "http://www.qualcomm.cn/generate_204",
+      "interval": "5m",
+      "tolerance": 50
+    },
+    {
+      "tag": "美国",
+      "type": "urltest",
+      "outbounds": [],
+      "url": "http://www.qualcomm.cn/generate_204",
+      "interval": "5m",
+      "tolerance": 50
+    },
+    {
+      "tag": "其他地区",
+      "type": "urltest",
+      "outbounds": [],
+      "url": "http://www.qualcomm.cn/generate_204",
+      "interval": "5m",
+      "tolerance": 50,
+      "idle_timeout": "30m"
+    },
+    {
+      "tag": "AI 服务",
+      "type": "selector",
+      "outbounds": ["节点选择", "自动选择", "direct", "block", "香港", "台湾", "日本", "新加坡", "美国", "其他地区"]
+    },
+    {
+      "tag": "油管视频",
+      "type": "selector",
+      "outbounds": ["节点选择", "自动选择", "direct", "block", "香港", "台湾", "日本", "新加坡", "美国", "其他地区"]
+    },
+    {
+      "tag": "谷歌服务",
+      "type": "selector",
+      "outbounds": ["节点选择", "自动选择", "direct", "block", "香港", "台湾", "日本", "新加坡", "美国", "其他地区"]
+    },
+    {
+      "tag": "微软服务",
+      "type": "selector",
+      "outbounds": ["节点选择", "自动选择", "direct", "block", "香港", "台湾", "日本", "新加坡", "美国", "其他地区"]
+    },
+    {
+      "tag": "苹果服务",
+      "type": "selector",
+      "outbounds": ["节点选择", "自动选择", "direct", "block", "香港", "台湾", "日本", "新加坡", "美国", "其他地区"]
+    },
+    {
+      "tag": "电报消息",
+      "type": "selector",
+      "outbounds": ["新加坡", "香港", "节点选择", "自动选择", "direct", "block", "美国", "日本", "台湾", "其他地区"]
+    },
+    {
+      "tag": "奈飞",
+      "type": "selector",
+      "outbounds": ["节点选择", "自动选择", "direct", "block", "香港", "台湾", "日本", "新加坡", "美国", "其他地区"]
+    },
+    {
+      "tag": "代码托管",
+      "type": "selector",
+      "outbounds": ["节点选择", "自动选择", "direct", "block", "香港", "台湾", "日本", "新加坡", "美国", "其他地区"]
+    },
+    {
+      "tag": "广告拦截",
+      "type": "selector",
+      "outbounds": ["block", "direct", "节点选择"]
+    },
+    {
+      "tag": "私有网络",
+      "type": "selector",
+      "outbounds": ["direct", "block", "节点选择", "香港", "台湾", "日本", "新加坡", "美国", "其他地区"]
+    },
+    {
+      "tag": "国内服务",
+      "type": "selector",
+      "outbounds": ["direct", "block", "节点选择", "香港", "台湾", "日本", "新加坡", "美国", "其他地区"]
+    },
+    {
+      "tag": "非中国",
+      "type": "selector",
+      "outbounds": ["节点选择", "自动选择", "direct", "block", "香港", "台湾", "日本", "新加坡", "美国", "其他地区"]
+    },
+    {
+      "tag": "漏网之鱼",
+      "type": "selector",
+      "outbounds": ["节点选择", "自动选择", "direct", "block", "香港", "台湾", "日本", "新加坡", "美国", "其他地区"]
+    },
+    {
+      "tag": "direct",
+      "type": "direct"
+    },
+    {
+      "tag": "block",
+      "type": "block"
+    },
+    {
+      "tag": "dns-out",
+      "type": "dns"
+    }
+  ],
+  "route": {
+    "final": "漏网之鱼",
+    "auto_detect_interface": true,
+    "default_domain_resolver": "dns-cn",
+    "rules": [
+      {
+        "action": "sniff",
+        "inbound": ["mixed-in"]
+      },
+      {
+        "action": "resolve",
+        "inbound": ["mixed-in"]
+      },
+      {
+        "rule_set": ["category-ads-all"],
+        "outbound": "广告拦截"
+      },
+      {
+        "domain": [
+          "mtalk-dev.google.com",
+          "mtalk-staging.google.com",
+          "67982.eu.cc",
+          "emby.67982.eu.cc",
+          "auto.dolby.dpdns.org",
+          "emby.4348663.xyz",
+          "emby.sadchicktv.com",
+          "saodu6.cn",
+          "2.66990000.xyz",
+          "xxm.kingemby.xyz",
+          "emo1.525778.xyz"
+        ],
+        "outbound": "国内服务"
+      },
+      {
+        "domain_keyword": [
+          "miraiemby.com",
+          "tyemby.klplay",
+          "dayimakk.sharepoint",
+          "mtalk.google",
+          "theluyuan.com",
+          "ey.626258"
+        ],
+        "outbound": "国内服务"
+      },
+      {
+        "domain_suffix": [
+          "embymv.link",
+          "emby.my",
+          "8880080.xyz",
+          "api-huacloud.dev"
+        ],
+        "outbound": "国内服务"
+      },
+      {
+        "rule_set": ["category-ai-chat-!cn", "openai", "anthropic", "google-gemini", "perplexity"],
+        "outbound": "AI 服务"
+      },
+      {
+        "rule_set": ["youtube"],
+        "outbound": "油管视频"
+      },
+      {
+        "rule_set": ["google", "google-ip"],
+        "outbound": "谷歌服务"
+      },
+      {
+        "rule_set": ["private", "private-ip"],
+        "outbound": "私有网络"
+      },
+      {
+        "rule_set": ["geolocation-cn", "cn-ip", "googlefcm", "googlefcm@!cn", "115", "cn"],
+        "outbound": "国内服务"
+      },
+      {
+        "ip_is_private": true,
+        "outbound": "direct"
+      },
+      {
+        "geoip": ["sg"],
+        "outbound": "新加坡"
+      },
+      {
+        "geoip": ["us"],
+        "outbound": "美国"
+      },
+      {
+        "geoip": ["hk"],
+        "outbound": "香港"
+      },
+      {
+        "ip_cidr": ["5.28.192.0/18", "109.239.140.0/24"],
+        "outbound": "香港",
+        "no_resolve": true
+      },
+      {
+        "rule_set": ["telegram", "telegram-ip"],
+        "outbound": "电报消息"
+      },
+      {
+        "ip_cidr": [
+          "149.154.175.0/22",
+          "149.154.167.0/22",
+          "149.154.168.0/22",
+          "149.154.172.0/22",
+          "91.108.56.0/22",
+          "91.108.4.0/22",
+          "91.108.8.0/22",
+          "91.108.12.0/22",
+          "91.108.16.0/22",
+          "91.105.192.0/23",
+          "185.76.151.0/24"
+        ],
+        "outbound": "电报消息",
+        "no_resolve": true
+      },
+      {
+        "rule_set": ["github", "gitlab", "atlassian"],
+        "outbound": "代码托管"
+      },
+      {
+        "rule_set": ["microsoft", "onedrive"],
+        "outbound": "微软服务"
+      },
+      {
+        "rule_set": ["apple", "icloud"],
+        "outbound": "苹果服务"
+      },
+      {
+        "rule_set": ["netflix", "netflix-ip"],
+        "outbound": "奈飞"
+      },
+      {
+        "rule_set": ["geolocation-!cn"],
+        "outbound": "非中国"
+      },
+      {
+        "protocol": "dns",
+        "outbound": "dns-out"
+      }
+    ],
+    "rule_set": [
+      { "tag": "category-ads-all", "type": "remote", "format": "binary", "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geosite/category-ads-all.srs" },
+      { "tag": "private", "type": "remote", "format": "binary", "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geosite/private.srs" },
+      { "tag": "private-ip", "type": "remote", "format": "binary", "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geoip/private.srs" },
+      { "tag": "geolocation-cn", "type": "remote", "format": "binary", "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geosite/geolocation-cn.srs" },
+      { "tag": "cn-ip", "type": "remote", "format": "binary", "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geoip/cn.srs" },
+      { "tag": "googlefcm", "type": "remote", "format": "binary", "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geosite/googlefcm.srs" },
+      { "tag": "googlefcm@!cn", "type": "remote", "format": "binary", "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geosite/googlefcm@!cn.srs" },
+      { "tag": "geolocation-!cn", "type": "remote", "format": "binary", "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geosite/geolocation-!cn.srs" },
+      { "tag": "category-ai-chat-!cn", "type": "remote", "format": "binary", "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geosite/category-ai-chat-!cn.srs" },
+      { "tag": "openai", "type": "remote", "format": "binary", "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geosite/openai.srs" },
+      { "tag": "anthropic", "type": "remote", "format": "binary", "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geosite/anthropic.srs" },
+      { "tag": "google-gemini", "type": "remote", "format": "binary", "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geosite/google-gemini.srs" },
+      { "tag": "perplexity", "type": "remote", "format": "binary", "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geosite/perplexity.srs" },
+      { "tag": "youtube", "type": "remote", "format": "binary", "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geosite/youtube.srs" },
+      { "tag": "google", "type": "remote", "format": "binary", "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geosite/google.srs" },
+      { "tag": "google-ip", "type": "remote", "format": "binary", "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geoip/google.srs" },
+      { "tag": "microsoft", "type": "remote", "format": "binary", "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geosite/microsoft.srs" },
+      { "tag": "onedrive", "type": "remote", "format": "binary", "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geosite/onedrive.srs" },
+      { "tag": "apple", "type": "remote", "format": "binary", "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geosite/apple.srs" },
+      { "tag": "icloud", "type": "remote", "format": "binary", "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geosite/icloud.srs" },
+      { "tag": "telegram", "type": "remote", "format": "binary", "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geosite/telegram.srs" },
+      { "tag": "telegram-ip", "type": "remote", "format": "binary", "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geoip/telegram.srs" },
+      { "tag": "netflix", "type": "remote", "format": "binary", "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geosite/netflix.srs" },
+      { "tag": "netflix-ip", "type": "remote", "format": "binary", "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geoip/netflix.srs" },
+      { "tag": "github", "type": "remote", "format": "binary", "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geosite/github.srs" },
+      { "tag": "gitlab", "type": "remote", "format": "binary", "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geosite/gitlab.srs" },
+      { "tag": "atlassian", "type": "remote", "format": "binary", "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geosite/atlassian.srs" },
+      { "tag": "cn", "type": "remote", "format": "binary", "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geosite/cn.srs" },
+      { "tag": "115", "type": "remote", "format": "binary", "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geosite/115.srs" },
+      { "tag": "geosite-cn", "type": "remote", "format": "binary", "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geosite/cn.srs" },
+      { "tag": "geosite-private", "type": "remote", "format": "binary", "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geosite/private.srs" },
+      { "tag": "geosite-geolocation-!cn", "type": "remote", "format": "binary", "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geosite/geolocation-!cn.srs" }
+    ]
+  },
+  "experimental": {
+    "clash_api": {
+      "external_controller": "127.0.0.1:9090",
+      "external_ui": "ui",
+      "secret": "",
+      "default_mode": "rule",
+      "store_selected": true
+    },
+    "cache_file": {
+      "enabled": true,
+      "path": "cache.db",
+      "store_fakeip": true
+    }
+  }
+}
