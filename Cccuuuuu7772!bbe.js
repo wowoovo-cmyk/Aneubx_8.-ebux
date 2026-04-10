@@ -41,29 +41,27 @@ function main(config) {
     "use-system-hosts": false,
     "enhanced-mode": "fake-ip",
     "fake-ip-range": "198.18.0.1/16",
-    "default-nameserver": ["180.76.76.76", "182.254.118.118", "8.8.8.8", "180.184.2.2"],
-    nameserver: [
+    // 优化后的基础引导 DNS
+    "default-nameserver": [
+      "223.5.5.5",
+      "119.29.29.29",
       "180.76.76.76",
+      "180.184.1.1"
+    ],
+    // 优化后的国内日常解析 DNS
+    nameserver: [
+      "223.5.5.5",
       "119.29.29.29",
       "180.184.1.1",
-      "223.5.5.5",
-      "8.8.8.8",
-      "https://223.6.6.6/dns-query#h3=true",
       "https://dns.alidns.com/dns-query",
-      "https://cloudflare-dns.com/dns-query",
-      "https://doh.pub/dns-query",
+      "https://doh.pub/dns-query"
     ],
+    // 优化后的国外防污染 DNS
     fallback: [
-      "https://000000.dns.nextdns.io/dns-query#h3=true",
-      "https://dns.alidns.com/dns-query",
-      "https://doh.pub/dns-query",
-      "https://public.dns.iij.jp/dns-query",
-      "https://101.101.101.101/dns-query",
-      "https://208.67.220.220/dns-query",
-      "tls://8.8.4.4",
-      "tls://1.0.0.1:853",
       "https://cloudflare-dns.com/dns-query",
       "https://dns.google/dns-query",
+      "tls://8.8.4.4",
+      "https://101.101.101.101/dns-query"
     ],
     "fallback-filter": {
       geoip: true,
