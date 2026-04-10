@@ -29,6 +29,7 @@ function main(config) {
   config["hosts"] = {
     "doh.pub": ["1.12.12.21"],
     "dns.google": ["8.8.8.8"],
+    "cloudflare-dns.com": ["1.1.1.1"],
   };
 
   config.sniffer = {
@@ -47,17 +48,19 @@ function main(config) {
     ipv6: false,
     "enhanced-mode": "fake-ip",
     "fake-ip-range": "198.18.0.1/16",
-    "cache-size": 0,
+    "cache-size": 1000,
     "prefer-h3": false,
     "filter-aaaa": true,
     "proxy-server-nameserver": [
       "https://doh.pub/dns-query"
     ],
     nameserver: [
-      "https://dns.google/dns-query"
+      "https://dns.google/dns-query",
+      "https://cloudflare-dns.com/dns-query"
     ],
     fallback: [
-      "https://dns.google/dns-query"
+      "https://dns.google/dns-query",
+      "https://cloudflare-dns.com/dns-query"
     ],
     "nameserver-policy": {
       "geosite:cn": "https://doh.pub/dns-query",
@@ -67,7 +70,9 @@ function main(config) {
       geoip: true,
       "geoip-code": "CN",
       ipmask: [
-        "240.0.0.0/4"
+        "240.0.0.0/4",
+        "0.0.0.0/32",
+        "127.0.0.1/32"
       ],
       domain: [
         "+.google.com",
