@@ -41,14 +41,12 @@ function main(config) {
     "use-system-hosts": false,
     "enhanced-mode": "fake-ip",
     "fake-ip-range": "198.18.0.1/16",
-    // 优化后的基础引导 DNS
     "default-nameserver": [
       "223.5.5.5",
       "119.29.29.29",
       "180.76.76.76",
       "180.184.1.1"
     ],
-    // 优化后的国内日常解析 DNS
     nameserver: [
       "223.5.5.5",
       "119.29.29.29",
@@ -56,7 +54,6 @@ function main(config) {
       "https://dns.alidns.com/dns-query",
       "https://doh.pub/dns-query"
     ],
-    // 优化后的国外防污染 DNS
     fallback: [
       "https://cloudflare-dns.com/dns-query",
       "https://dns.google/dns-query",
@@ -182,9 +179,10 @@ function main(config) {
   const fullProxies = ["节点选择", "自动选择", "DIRECT", "REJECT", "香港", "台湾", "日本", "新加坡", "美国", "其他地区"];
   const regionProxies = ["香港", "台湾", "日本", "新加坡", "美国", "其他地区"];
   
+  // 测速地址统一修改为了 http://www.gstatic.com/generate_204
   config["proxy-groups"] = [
     { name: "节点选择", type: "select", proxies: ["自动选择", "DIRECT", "REJECT", ...regionProxies, ...autoNodes] },
-    { name: "自动选择", type: "url-test", proxies: autoNodes, url: "http://www.qualcomm.cn/generate_204", interval: 600, tolerance: 50, lazy: false },
+    { name: "自动选择", type: "url-test", proxies: autoNodes, url: "http://www.gstatic.com/generate_204", interval: 600, tolerance: 50, lazy: false },
     { name: "AI 服务", type: "select", proxies: fullProxies },
     { name: "油管视频", type: "select", proxies: fullProxies },
     { name: "谷歌服务", type: "select", proxies: fullProxies },
@@ -198,12 +196,12 @@ function main(config) {
     { name: "国内服务", type: "select", proxies: ["DIRECT", "REJECT", "节点选择", ...regionProxies] },
     { name: "非中国", type: "select", proxies: fullProxies },
     { name: "漏网之鱼", type: "select", proxies: fullProxies },
-    { name: "香港", type: "url-test", proxies: hkFinal, url: "http://www.qualcomm.cn/generate_204", interval: 300, tolerance: 50, lazy: false },
-    { name: "台湾", type: "url-test", proxies: twFinal, url: "http://www.qualcomm.cn/generate_204", interval: 300, tolerance: 50, lazy: false },
-    { name: "日本", type: "url-test", proxies: jpFinal, url: "http://www.qualcomm.cn/generate_204", interval: 300, tolerance: 50, lazy: false },
-    { name: "新加坡", type: "url-test", proxies: sgFinal, url: "http://www.qualcomm.cn/generate_204", interval: 300, tolerance: 50, lazy: false },
-    { name: "美国", type: "url-test", proxies: usFinal, url: "http://www.qualcomm.cn/generate_204", interval: 300, tolerance: 50, lazy: false },
-    { name: "其他地区", type: "url-test", proxies: otherFinal, url: "http://www.qualcomm.cn/generate_204", interval: 300, tolerance: 50, lazy: true },
+    { name: "香港", type: "url-test", proxies: hkFinal, url: "http://www.gstatic.com/generate_204", interval: 300, tolerance: 50, lazy: false },
+    { name: "台湾", type: "url-test", proxies: twFinal, url: "http://www.gstatic.com/generate_204", interval: 300, tolerance: 50, lazy: false },
+    { name: "日本", type: "url-test", proxies: jpFinal, url: "http://www.gstatic.com/generate_204", interval: 300, tolerance: 50, lazy: false },
+    { name: "新加坡", type: "url-test", proxies: sgFinal, url: "http://www.gstatic.com/generate_204", interval: 300, tolerance: 50, lazy: false },
+    { name: "美国", type: "url-test", proxies: usFinal, url: "http://www.gstatic.com/generate_204", interval: 300, tolerance: 50, lazy: false },
+    { name: "其他地区", type: "url-test", proxies: otherFinal, url: "http://www.gstatic.com/generate_204", interval: 300, tolerance: 50, lazy: true },
   ];
   
   const GH = "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo";
