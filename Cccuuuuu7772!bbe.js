@@ -270,4 +270,3 @@ function main(config) {
   ];    
   return config;    
 }
-多维度的给这份配置文件打个分
