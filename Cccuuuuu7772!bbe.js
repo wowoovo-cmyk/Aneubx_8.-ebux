@@ -1,5 +1,4 @@
 function main(config) {
-  // === 基础与内核配置 ===
   config["ipv6"] = false;
   config["external-controller"] = "127.0.0.1:9090";
   config["secret"] = "";
@@ -27,7 +26,6 @@ function main(config) {
     asn: "https://github.com/xishang0128/geoip/releases/download/latest/GeoLite2-ASN.mmdb",
   };
 
-  // === DNS 与嗅探配置 ===
   config["hosts"] = {
     "doh.pub": ["1.12.12.21", "1.12.12.12"],
     "dns.google": ["8.8.8.8", "8.8.4.4"],
@@ -45,6 +43,33 @@ function main(config) {
     },
   };
 
+  const buildFakeIpFilter = (existingFilter = []) => {
+    const base = [
+      "geosite:private",
+      "geosite:google-cn",
+      "geosite:synology",
+      "+.lan",
+      "+.local",
+      "+.msftconnecttest.com",
+      "+.msftncsi.com",
+      "localhost.ptlogin2.qq.com",
+      "time.*.com",
+      "stun.*.*",
+      "+.srv.nintendo.net",
+      "+.stun.playstation.net",
+      "+.xboxlive.com",
+      "music.163.com",
+      "+.music.163.com",
+      "+.126.net",
+      "+.kuwo.cn",
+      "+.y.qq.com",
+      "+.music.migu.cn",
+      "+.xiami.com"
+    ];
+    const merged = [...base, ...existingFilter];
+    return [...new Set(merged)];
+  };
+
   config.dns = {
     enable: true,
     listen: "0.0.0.0:5053",
@@ -53,35 +78,92 @@ function main(config) {
     "use-system-hosts": false,
     "enhanced-mode": "fake-ip",
     "fake-ip-range": "198.18.0.1/16",
+    "fake-ip-filter-mode": "blacklist",
     "respect-rules": true,
-    "fake-ip-filter": [
-      "+.lan", "+.local", "+.msftconnecttest.com", "+.msftncsi.com",
-      "localhost.ptlogin2.qq.com", "time.*.com", "stun.*.*",
-      "+.srv.nintendo.net", "+.stun.playstation.net", "+.xboxlive.com",
-      "music.163.com", "+.music.163.com", "+.126.net", "+.kuwo.cn",
-      "+.y.qq.com", "+.music.migu.cn", "+.xiami.com"
+    "cache-algorithm": "arc",
+
+    "fake-ip-filter": buildFakeIpFilter([]),
+
+    "default-nameserver": ["223.5.5.5", "119.29.29.29"],
+
+    nameserver: [
+      "https://dns.alidns.com/dns-query#DIRECT",
+      "https://doh.pub/dns-query#DIRECT"
     ],
-    "proxy-server-nameserver": ["https://doh.pub/dns-query"],
-    nameserver: ["https://doh.pub/dns-query", "https://dns.alidns.com/dns-query"],
-    fallback: ["https://dns.google/dns-query", "https://cloudflare-dns.com/dns-query"],
+
+    fallback: [
+      "https://1.1.1.1/dns-query#全部",
+      "https://8.8.8.8/dns-query#全部"
+    ],
+
     "nameserver-policy": {
-      "geosite:cn,private": ["https://doh.pub/dns-query", "https://dns.alidns.com/dns-query"],
-      "geosite:geolocation-!cn": ["https://dns.google/dns-query", "https://cloudflare-dns.com/dns-query"]
+      "geosite:private": "system",
+      "geosite:google-cn": [
+        "https://dns.alidns.com/dns-query#DIRECT",
+        "https://doh.pub/dns-query#DIRECT"
+      ],
+      "geosite:synology": [
+        "https://dns.alidns.com/dns-query#DIRECT",
+        "https://doh.pub/dns-query#DIRECT"
+      ],
+      "geosite:cn,private": [
+        "https://dns.alidns.com/dns-query#DIRECT",
+        "https://doh.pub/dns-query#DIRECT"
+      ],
+      "geosite:geolocation-!cn": [
+        "https://1.1.1.1/dns-query#全部",
+        "https://8.8.8.8/dns-query#全部"
+      ],
+      "geosite:openai": [
+        "https://1.1.1.1/dns-query#AI 服务",
+        "https://8.8.8.8/dns-query#AI 服务"
+      ],
+      "geosite:anthropic": [
+        "https://1.1.1.1/dns-query#AI 服务",
+        "https://8.8.8.8/dns-query#AI 服务"
+      ],
+      "geosite:google-gemini": [
+        "https://1.1.1.1/dns-query#AI 服务",
+        "https://8.8.8.8/dns-query#AI 服务"
+      ],
+      "geosite:perplexity": [
+        "https://1.1.1.1/dns-query#AI 服务",
+        "https://8.8.8.8/dns-query#AI 服务"
+      ]
     },
+
     "fallback-filter": {
       geoip: true,
       "geoip-code": "CN",
+      geosite: ["gfw"],
       ipcidr: ["240.0.0.0/4", "0.0.0.0/32", "127.0.0.1/32"],
       domain: [
-        "+.google.com", "+.facebook.com", "+.twitter.com",
+        "+.google.com",
+        "+.facebook.com",
+        "+.twitter.com",
         "+.youtube.com",
-        "+.xn--ngstr-lra8j.com", "+.google.cn", "+.googleapis.cn",
-        "+.googleapis.com", "+.gvt1.com"
+        "+.xn--ngstr-lra8j.com",
+        "+.google.cn",
+        "+.googleapis.cn",
+        "+.googleapis.com",
+        "+.gvt1.com"
       ]
-    }
+    },
+
+    "proxy-server-nameserver": [
+      "https://dns.alidns.com/dns-query#DIRECT",
+      "https://doh.pub/dns-query#DIRECT",
+      "system"
+    ],
+
+    "direct-nameserver": [
+      "https://dns.alidns.com/dns-query#DIRECT",
+      "https://doh.pub/dns-query#DIRECT",
+      "system"
+    ],
+    "direct-nameserver-follow-policy": false
   };
 
-  // === 节点过滤与分组逻辑 ===
   const allProxies = (config.proxies || []).map((p) => p.name);
   const junkFilter = /免费|free|下载专用|剩余|流量|到期|expire|test|trial|体验|0\.0|x0\.|套餐|重置|公告|官网|频道/i;
   const cleanProxies = allProxies.filter((n) => !junkFilter.test(n));
@@ -108,7 +190,7 @@ function main(config) {
   const fullProxies = ["节点选择", "自动选择", "DIRECT", "REJECT", "香港", "台湾", "日本", "新加坡", "美国", "其他地区"];
   const regionProxies = ["香港", "台湾", "日本", "新加坡", "美国", "其他地区"];
 
-  const testUrl = "http://cp.cloudflare.com/generate_204";
+  const testUrl = "http://www.g.cn/generate_204";
   const testInterval = 600;
   const testTolerance = 150;
   const testTimeout = 5000;
@@ -144,13 +226,10 @@ function main(config) {
     { name: "其他地区", type: "url-test", proxies: otherFinal, url: testUrl, interval: testInterval, tolerance: testTolerance, timeout: testTimeout, lazy: true },
   ];
 
-  // === Rule Providers 规则集 ===
   var GH = "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo";
   config["rule-providers"] = {
-    // 广告拦截 - 仅保留 AWAvenue-Ads
     "AWAvenue-Ads": { type: "http", behavior: "domain", format: "yaml", interval: 604800, path: "./ruleset/AWAvenue-Ads.yaml", url: "https://testingcf.jsdelivr.net/gh/TG-Twilight/AWAvenue-Ads-Rule@main/Filters/AWAvenue-Ads-Rule-Clash.yaml" },
 
-    // 核心规则集
     "gfw": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/gfw.mrs", url: GH + "/geosite/gfw.mrs" },
     "tld-not-cn": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/tld-not-cn.mrs", url: GH + "/geosite/tld-!cn.mrs" },
     "cncidr": { type: "http", behavior: "ipcidr", format: "mrs", interval: 604800, path: "./ruleset/cncidr.mrs", url: GH + "/geoip/cn.mrs" },
@@ -158,18 +237,16 @@ function main(config) {
     "private-ip": { type: "http", behavior: "ipcidr", format: "mrs", interval: 604800, path: "./ruleset/private-ip.mrs", url: GH + "/geoip/private.mrs" },
     "geolocation-cn": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/geolocation-cn.mrs", url: GH + "/geosite/geolocation-cn.mrs" },
 
-    // FCM 推送
     "googlefcm": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/googlefcm.mrs", url: GH + "/geosite/googlefcm.mrs" },
     "googlefcm@!cn": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/googlefcm@!cn.mrs", url: GH + "/geosite/googlefcm@!cn.mrs" },
 
-    // AI 服务
     "category-ai-chat-!cn": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/category-ai-chat-!cn.mrs", url: GH + "/geosite/category-ai-chat-!cn.mrs" },
     "openai": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/openai.mrs", url: GH + "/geosite/openai.mrs" },
     "anthropic": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/anthropic.mrs", url: GH + "/geosite/anthropic.mrs" },
     "google-gemini": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/google-gemini.mrs", url: GH + "/geosite/google-gemini.mrs" },
     "perplexity": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/perplexity.mrs", url: GH + "/geosite/perplexity.mrs" },
+    "OverseasAI": { type: "http", behavior: "domain", format: "text", interval: 604800, path: "./ruleset/OverseasAI.list", url: "https://raw.githubusercontent.com/viewer12/OverseasAI.list/main/rule/Clash/OverseasAI/OverseasAI.list" },
 
-    // 流媒体
     "youtube": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/youtube.mrs", url: GH + "/geosite/youtube.mrs" },
     "netflix": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/netflix.mrs", url: GH + "/geosite/netflix.mrs" },
     "tiktok": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/tiktok.mrs", url: GH + "/geosite/tiktok.mrs" },
@@ -177,36 +254,30 @@ function main(config) {
     "disney": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/disney.mrs", url: GH + "/geosite/disney.mrs" },
     "primevideo": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/primevideo.mrs", url: GH + "/geosite/primevideo.mrs" },
 
-    // 社交通讯
     "telegram": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/telegram.mrs", url: GH + "/geosite/telegram.mrs" },
     "twitter": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/twitter.mrs", url: GH + "/geosite/twitter.mrs" },
     "facebook": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/facebook.mrs", url: GH + "/geosite/facebook.mrs" },
     "instagram": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/instagram.mrs", url: GH + "/geosite/instagram.mrs" },
     "discord": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/discord.mrs", url: GH + "/geosite/discord.mrs" },
 
-    // 大厂服务
     "google": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/google.mrs", url: GH + "/geosite/google.mrs" },
     "microsoft": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/microsoft.mrs", url: GH + "/geosite/microsoft.mrs" },
     "onedrive": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/onedrive.mrs", url: GH + "/geosite/onedrive.mrs" },
     "apple": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/apple.mrs", url: GH + "/geosite/apple.mrs" },
     "icloud": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/icloud.mrs", url: GH + "/geosite/icloud.mrs" },
 
-    // 代码托管
     "github": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/github.mrs", url: GH + "/geosite/github.mrs" },
     "gitlab": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/gitlab.mrs", url: GH + "/geosite/gitlab.mrs" },
     "atlassian": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/atlassian.mrs", url: GH + "/geosite/atlassian.mrs" },
 
-    // 游戏平台
     "steam": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/steam.mrs", url: GH + "/geosite/steam.mrs" },
     "epicgames": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/epicgames.mrs", url: GH + "/geosite/epicgames.mrs" },
 
-    // 网盘分流
     "aliyun-drive": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/aliyun-drive.mrs", url: GH + "/geosite/aliyun.mrs" },
     "115": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/115.mrs", url: GH + "/geosite/115.mrs" },
   };
 
   config.rules = [
-    // 局域网/私有网络 - 使用原有的 RULE-SET 方式
     "RULE-SET,private,私有网络",
     "RULE-SET,private-ip,私有网络,no-resolve",
 
@@ -233,7 +304,6 @@ function main(config) {
     "DOMAIN-SUFFIX,8880080.xyz,国内服务",
     "DOMAIN-SUFFIX,api-huacloud.dev,国内服务",
 
-    // 网盘分流
     "RULE-SET,aliyun-drive,网盘分流",
     "RULE-SET,115,网盘分流",
 
@@ -245,6 +315,7 @@ function main(config) {
     "RULE-SET,anthropic,AI 服务",
     "RULE-SET,google-gemini,AI 服务",
     "RULE-SET,perplexity,AI 服务",
+    "RULE-SET,OverseasAI,AI 服务",
 
     "RULE-SET,youtube,油管视频",
     "RULE-SET,netflix,奈飞",
