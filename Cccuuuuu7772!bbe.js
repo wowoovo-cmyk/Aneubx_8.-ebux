@@ -282,8 +282,6 @@ function main(config) {
     "RULE-SET,private-ip,私有网络,no-resolve",
 
     "RULE-SET,AWAvenue-Ads,广告拦截",
-    "DOMAIN,mtalk-dev.google.com,国内服务",
-    "DOMAIN,mtalk-staging.google.com,国内服务",
     "DOMAIN,67982.eu.cc,国内服务",
     "DOMAIN,emby.67982.eu.cc,国内服务",
     "DOMAIN,auto.dolby.dpdns.org,国内服务",
