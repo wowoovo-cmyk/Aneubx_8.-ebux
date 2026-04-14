@@ -178,6 +178,7 @@ function main(config) {
   const jpNodes = filterNodes(/日|jp|japan/i);
   const sgNodes = filterNodes(/新加坡|狮城|sg|singapore/i);
   const usNodes = filterNodes(/美|us|unitedstates|united.states/i);
+  const euNodes = filterNodes(/欧|eu|europe|欧洲|de|德国|fr|法国|nl|荷兰|it|意大利|es|西班牙|se|瑞典|ch|瑞士|英|uk|united kingdom|britain|gb/i);
   const otherNodes = filterNodes(/韩|kr|korea|德|英|法|俄|土|印|加|澳|马|阿|fr|de|uk|gb|ru|tr|in|ca|au|my|ar/i);
 
   const hkFinal = hkNodes.length > 0 ? hkNodes : autoNodes;
@@ -185,10 +186,11 @@ function main(config) {
   const jpFinal = jpNodes.length > 0 ? jpNodes : autoNodes;
   const sgFinal = sgNodes.length > 0 ? sgNodes : autoNodes;
   const usFinal = usNodes.length > 0 ? usNodes : autoNodes;
+  const euFinal = euNodes.length > 0 ? euNodes : autoNodes;
   const otherFinal = otherNodes.length > 0 ? otherNodes : autoNodes;
 
-  const fullProxies = ["节点选择", "自动选择", "DIRECT", "REJECT", "香港", "台湾", "日本", "新加坡", "美国", "其他地区"];
-  const regionProxies = ["香港", "台湾", "日本", "新加坡", "美国", "其他地区"];
+  const fullProxies = ["节点选择", "自动选择", "DIRECT", "REJECT", "香港", "台湾", "日本", "新加坡", "美国", "欧盟", "其他地区"];
+  const regionProxies = ["香港", "台湾", "日本", "新加坡", "美国", "欧盟", "其他地区"];
 
   const testUrl = "http://www.g.cn/generate_204";
   const testInterval = 600;
@@ -200,7 +202,7 @@ function main(config) {
     { name: "自动选择", type: "url-test", proxies: autoNodes, url: testUrl, interval: testInterval, tolerance: testTolerance, timeout: testTimeout, lazy: false },
     { name: "AI 服务", type: "select", proxies: fullProxies },
     { name: "谷歌服务", type: "select", proxies: fullProxies },
-    { name: "电报消息", type: "select", proxies: ["节点选择", "新加坡", "香港", "自动选择", "DIRECT", "REJECT", "美国", "日本", "台湾", "其他地区"] },
+    { name: "电报消息", type: "select", proxies: ["节点选择", "新加坡", "香港", "自动选择", "DIRECT", "REJECT", "美国", "日本", "台湾", "欧盟", "其他地区"] },
     { name: "FCM 推送", type: "select", proxies: ["DIRECT", "节点选择", "香港", "台湾", "日本", "新加坡", "美国", "自动选择", "REJECT"] },
     { name: "流媒体", type: "select", proxies: fullProxies },
     { name: "油管视频", type: "select", proxies: fullProxies },
@@ -214,7 +216,7 @@ function main(config) {
     { name: "广告拦截", type: "select", proxies: ["REJECT", "DIRECT", "节点选择"] },
     { name: "私有网络", type: "select", proxies: ["DIRECT", "REJECT", "节点选择", ...regionProxies] },
     { name: "国内服务", type: "select", proxies: ["DIRECT", "REJECT", "节点选择", ...regionProxies] },
-    { name: "网盘分流", type: "select", proxies: ["DIRECT", "国内服务", "节点选择"] },
+    { name: "国内网盘", type: "select", proxies: ["DIRECT", "国内服务", "节点选择"] },
     { name: "非中国", type: "select", proxies: fullProxies },
     { name: "漏网之鱼", type: "select", proxies: fullProxies },
     { name: "香港", type: "url-test", proxies: hkFinal, url: testUrl, interval: testInterval, tolerance: testTolerance, timeout: testTimeout, lazy: false },
@@ -222,6 +224,7 @@ function main(config) {
     { name: "日本", type: "url-test", proxies: jpFinal, url: testUrl, interval: testInterval, tolerance: testTolerance, timeout: testTimeout, lazy: false },
     { name: "新加坡", type: "url-test", proxies: sgFinal, url: testUrl, interval: testInterval, tolerance: testTolerance, timeout: testTimeout, lazy: false },
     { name: "美国", type: "url-test", proxies: usFinal, url: testUrl, interval: testInterval, tolerance: testTolerance, timeout: testTimeout, lazy: false },
+    { name: "欧盟", type: "url-test", proxies: euFinal, url: testUrl, interval: testInterval, tolerance: testTolerance, timeout: testTimeout, lazy: false },
     { name: "其他地区", type: "url-test", proxies: otherFinal, url: testUrl, interval: testInterval, tolerance: testTolerance, timeout: testTimeout, lazy: true },
   ];
 
@@ -292,8 +295,8 @@ function main(config) {
     "DOMAIN-SUFFIX,emby.my,国内服务",
     "DOMAIN-SUFFIX,8880080.xyz,国内服务",
     "DOMAIN-SUFFIX,api-huacloud.dev,国内服务",
-    "RULE-SET,aliyun-drive,网盘分流",
-    "RULE-SET,115,网盘分流",
+    "RULE-SET,aliyun-drive,国内网盘",
+    "RULE-SET,115,国内网盘",
     "RULE-SET,googlefcm,FCM 推送",
     "RULE-SET,googlefcm@!cn,FCM 推送",
     "RULE-SET,category-ai-chat-!cn,AI 服务",
