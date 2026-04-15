@@ -13,6 +13,7 @@ function main(config) {
   config["geo-auto-update"] = true;
   config["geodata-loader"] = "standard";
   config["geo-update-interval"] = 24;
+  config["max-failed-times"] = 1;
 
   config.profile = {
     "store-selected": true,
@@ -179,7 +180,7 @@ function main(config) {
   const sgNodes = filterNodes(/新加坡|狮城|sg|singapore/i);
   const usNodes = filterNodes(/美|us|unitedstates|united.states/i);
   const euNodes = filterNodes(/欧|eu|europe|欧洲|de|德国|fr|法国|nl|荷兰|it|意大利|es|西班牙|se|瑞典|ch|瑞士|英|uk|united kingdom|britain|gb/i);
-  const otherNodes = filterNodes(/韩|kr|korea|德|英|法|俄|土|印|加|澳|马|阿|fr|de|uk|gb|ru|tr|in|ca|au|my|ar/i);
+  const otherNodes = filterNodes(/韩|kr|korea|俄|ru|russia|土|tr|turkey|印|in|india|加|ca|canada|澳|au|australia|马|my|malaysia|阿|ar|argentina|br|brazil|巴西/i);
 
   const hkFinal = hkNodes.length > 0 ? hkNodes : autoNodes;
   const twFinal = twNodes.length > 0 ? twNodes : autoNodes;
@@ -193,8 +194,8 @@ function main(config) {
   const regionProxies = ["香港", "台湾", "日本", "新加坡", "美国", "欧盟", "其他地区"];
 
   const testUrl = "http://www.g.cn/generate_204";
-  const testInterval = 600;
-  const testTolerance = 150;
+  const testInterval = 60;
+  const testTolerance = 30;
   const testTimeout = 5000;
 
   config["proxy-groups"] = [
