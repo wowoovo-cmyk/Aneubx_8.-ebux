@@ -1,4 +1,4 @@
-Function main(config) {
+function main(config) {
   config["ipv6"] = false;
   config["external-controller"] = "127.0.0.1:9090";
   config["secret"] = "";
@@ -159,14 +159,15 @@ Function main(config) {
   const fullProxies = ["节点选择", "自动选择", "DIRECT", "REJECT", "香港", "台湾", "日本", "新加坡", "美国", "欧盟", "其他地区"];
   const regionProxies = ["香港", "台湾", "日本", "新加坡", "美国", "欧盟", "其他地区"];
 
-  const testUrl = "http://www.g.cn/generate_204";
-  const testInterval = 60;
-  const testTolerance = 30;
-  const testTimeout = 5000;
+  // 移动端省电与防断流配置
+  const testUrl = "http://www.gstatic.com/generate_204"; 
+  const testInterval = 300; 
+  const testTolerance = 50; 
+  const testTimeout = 3000; 
 
   config["proxy-groups"] = [
     { name: "节点选择", type: "select", proxies: ["自动选择", "DIRECT", "REJECT", ...regionProxies, ...autoNodes] },
-    { name: "自动选择", type: "url-test", proxies: autoNodes, url: testUrl, interval: testInterval, tolerance: testTolerance, timeout: testTimeout, lazy: false },
+    { name: "自动选择", type: "url-test", proxies: autoNodes, url: testUrl, interval: testInterval, tolerance: testTolerance, timeout: testTimeout, lazy: true },
     { name: "AI 服务", type: "select", proxies: fullProxies },
     { name: "谷歌服务", type: "select", proxies: fullProxies },
     { name: "电报消息", type: "select", proxies: ["节点选择", "新加坡", "香港", "自动选择", "DIRECT", "REJECT", "美国", "日本", "台湾", "欧盟", "其他地区"] },
@@ -186,12 +187,12 @@ Function main(config) {
     { name: "国内网盘", type: "select", proxies: ["DIRECT", "国内服务", "节点选择"] },
     { name: "非中国", type: "select", proxies: fullProxies },
     { name: "漏网之鱼", type: "select", proxies: fullProxies },
-    { name: "香港", type: "url-test", proxies: hkFinal, url: testUrl, interval: testInterval, tolerance: testTolerance, timeout: testTimeout, lazy: false },
-    { name: "台湾", type: "url-test", proxies: twFinal, url: testUrl, interval: testInterval, tolerance: testTolerance, timeout: testTimeout, lazy: false },
-    { name: "日本", type: "url-test", proxies: jpFinal, url: testUrl, interval: testInterval, tolerance: testTolerance, timeout: testTimeout, lazy: false },
-    { name: "新加坡", type: "url-test", proxies: sgFinal, url: testUrl, interval: testInterval, tolerance: testTolerance, timeout: testTimeout, lazy: false },
-    { name: "美国", type: "url-test", proxies: usFinal, url: testUrl, interval: testInterval, tolerance: testTolerance, timeout: testTimeout, lazy: false },
-    { name: "欧盟", type: "url-test", proxies: euFinal, url: testUrl, interval: testInterval, tolerance: testTolerance, timeout: testTimeout, lazy: false },
+    { name: "香港", type: "url-test", proxies: hkFinal, url: testUrl, interval: testInterval, tolerance: testTolerance, timeout: testTimeout, lazy: true },
+    { name: "台湾", type: "url-test", proxies: twFinal, url: testUrl, interval: testInterval, tolerance: testTolerance, timeout: testTimeout, lazy: true },
+    { name: "日本", type: "url-test", proxies: jpFinal, url: testUrl, interval: testInterval, tolerance: testTolerance, timeout: testTimeout, lazy: true },
+    { name: "新加坡", type: "url-test", proxies: sgFinal, url: testUrl, interval: testInterval, tolerance: testTolerance, timeout: testTimeout, lazy: true },
+    { name: "美国", type: "url-test", proxies: usFinal, url: testUrl, interval: testInterval, tolerance: testTolerance, timeout: testTimeout, lazy: true },
+    { name: "欧盟", type: "url-test", proxies: euFinal, url: testUrl, interval: testInterval, tolerance: testTolerance, timeout: testTimeout, lazy: true },
     { name: "其他地区", type: "url-test", proxies: otherFinal, url: testUrl, interval: testInterval, tolerance: testTolerance, timeout: testTimeout, lazy: true },
   ];
 
@@ -243,7 +244,7 @@ Function main(config) {
     "RULE-SET,AWAvenue-Ads,广告拦截",
     "RULE-SET,OverseasAI,AI 服务",
     
-    // 【优化一】：精准域名查表开销极低，置顶可避免被后续无 `no-resolve` 的 IP 规则引发阻塞解析
+    // 纯域名直连规则置顶，避免性能损耗和防解析泄漏
     "DOMAIN,mtalk-dev.google.com,国内服务",
     "DOMAIN,mtalk-staging.google.com,国内服务",
     "DOMAIN,67982.eu.cc,国内服务",
@@ -281,6 +282,7 @@ Function main(config) {
     "RULE-SET,spotify,流媒体",
     "RULE-SET,disney,流媒体",
     "RULE-SET,primevideo,流媒体",
+    
     "IP-CIDR,91.108.16.0/21,新加坡,no-resolve",
     "IP-CIDR,91.108.56.0/23,新加坡,no-resolve",
     "IP-CIDR,149.154.168.0/22,新加坡,no-resolve",
@@ -300,6 +302,7 @@ Function main(config) {
     "IP-CIDR,185.76.151.0/24,香港,no-resolve",
     "IP-CIDR6,2001:67c:4e8::/48,香港,no-resolve",
     "IP-CIDR6,2a0a:f280:203::/48,香港,no-resolve",
+    
     "RULE-SET,telegram,电报消息",
     "RULE-SET,twitter,社交平台",
     "RULE-SET,facebook,社交平台",
@@ -317,7 +320,7 @@ Function main(config) {
     "RULE-SET,epicgames,游戏平台",
     "RULE-SET,gfw,节点选择",
     
-    // 【优化二】：补充 no-resolve 斩断底层解析死锁
+    // IP-ASN 强制追加 no-resolve，避免意外触发底层 DNS 查询
     "IP-ASN,44907,新加坡,no-resolve",
     "IP-ASN,62014,新加坡,no-resolve",
     "IP-ASN,59930,美国,no-resolve",
