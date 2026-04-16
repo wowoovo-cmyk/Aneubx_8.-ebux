@@ -44,7 +44,6 @@ function main(config) {
     },
   };
 
-  // === 优化后的 DNS 配置 ===
   config.dns = {
     enable: true,
     listen: "0.0.0.0:5053",
@@ -55,7 +54,6 @@ function main(config) {
     "fake-ip-range": "198.18.0.1/16",
     "fake-ip-filter-mode": "blacklist",
     "respect-rules": true,
-    "prefer-h3": true,
 
     "fake-ip-filter": [
       "+.lan",
@@ -71,51 +69,47 @@ function main(config) {
     ],
 
     "default-nameserver": [
-      "https://doh.pub/dns-query",
-      "https://dns.alidns.com/dns-query"
-    ],
-
-    nameserver: [
-      "https://1.1.1.1/dns-query#全部"
+      "223.5.5.5",
+      "119.29.29.29"
     ],
 
     "nameserver-policy": {
+      "geosite:private": "system",
       "geosite:cn": [
-        "https://doh.pub/dns-query#DIRECT",
-        "https://dns.alidns.com/dns-query#DIRECT"
+        "https://doh.pub/dns-query",
+        "https://dns.alidns.com/dns-query"
       ],
       "geosite:apple-cn": [
-        "https://doh.pub/dns-query#DIRECT",
-        "https://dns.alidns.com/dns-query#DIRECT"
+        "https://doh.pub/dns-query",
+        "https://dns.alidns.com/dns-query"
       ],
       "geosite:microsoft@cn": [
-        "https://doh.pub/dns-query#DIRECT",
-        "https://dns.alidns.com/dns-query#DIRECT"
+        "https://doh.pub/dns-query",
+        "https://dns.alidns.com/dns-query"
       ],
-      "geosite:private": "system",
       "geosite:google-cn": [
-        "https://doh.pub/dns-query#DIRECT",
-        "https://dns.alidns.com/dns-query#DIRECT"
+        "https://doh.pub/dns-query",
+        "https://dns.alidns.com/dns-query"
       ],
       "geosite:geolocation-!cn": [
-        "https://1.1.1.1/dns-query#全部",
-        "https://8.8.8.8/dns-query#全部"
+        "https://1.1.1.1/dns-query",
+        "https://8.8.8.8/dns-query"
       ],
       "geosite:openai": [
-        "https://1.1.1.1/dns-query#AI 服务",
-        "https://8.8.8.8/dns-query#AI 服务"
+        "https://1.1.1.1/dns-query",
+        "https://8.8.8.8/dns-query"
       ],
       "geosite:anthropic": [
-        "https://1.1.1.1/dns-query#AI 服务",
-        "https://8.8.8.8/dns-query#AI 服务"
+        "https://1.1.1.1/dns-query",
+        "https://8.8.8.8/dns-query"
       ],
       "geosite:google-gemini": [
-        "https://1.1.1.1/dns-query#AI 服务",
-        "https://8.8.8.8/dns-query#AI 服务"
+        "https://1.1.1.1/dns-query",
+        "https://8.8.8.8/dns-query"
       ],
       "geosite:perplexity": [
-        "https://1.1.1.1/dns-query#AI 服务",
-        "https://8.8.8.8/dns-query#AI 服务"
+        "https://1.1.1.1/dns-query",
+        "https://8.8.8.8/dns-query"
       ]
     },
 
@@ -126,20 +120,19 @@ function main(config) {
     },
 
     "proxy-server-nameserver": [
-      "https://doh.pub/dns-query#DIRECT",
-      "https://dns.alidns.com/dns-query#DIRECT"
+      "https://doh.pub/dns-query",
+      "https://dns.alidns.com/dns-query"
     ],
 
     "direct-nameserver": [
-      "https://doh.pub/dns-query#DIRECT",
-      "https://dns.alidns.com/dns-query#DIRECT"
+      "https://doh.pub/dns-query",
+      "https://dns.alidns.com/dns-query"
     ],
     "direct-nameserver-follow-policy": false
   };
 
-  // === 节点过滤与分组逻辑 ===
   const allProxies = (config.proxies || []).map((p) => p.name);
-  const junkFilter = /免费|free|下载专用|剩余|流量|到期|expire|test|trial|体验|0\.0|x0\.|套餐|重置|公告|官网|频道/i;
+  const junkFilter = /免费|free|下载专用|剩余|流量|到期|expire|test|trial|体验|0\.0|x0\.|套餐|重置|公告|官网|GB|频道/i;
   const cleanProxies = allProxies.filter((n) => !junkFilter.test(n));
 
   function filterNodes(regex) {
@@ -208,7 +201,7 @@ function main(config) {
     "gfw": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/gfw.mrs", url: GH + "/geosite/gfw.mrs" },
     "tld-not-cn": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/tld-not-cn.mrs", url: GH + "/geosite/tld-!cn.mrs" },
     "cncidr": { type: "http", behavior: "ipcidr", format: "mrs", interval: 604800, path: "./ruleset/cncidr.mrs", url: GH + "/geoip/cn.mrs" },
-    "private": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/private.mrs", url: GH + "/geosite/private.mrs" },
+    "private": { type: "http", behavior: "ipcidr", format: "mrs", interval: 604800, path: "./ruleset/private.mrs", url: GH + "/geoip/lan.mrs" },
     "private-ip": { type: "http", behavior: "ipcidr", format: "mrs", interval: 604800, path: "./ruleset/private-ip.mrs", url: GH + "/geoip/private.mrs" },
     "geolocation-cn": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/geolocation-cn.mrs", url: GH + "/geosite/geolocation-cn.mrs" },
     "googlefcm": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/googlefcm.mrs", url: GH + "/geosite/googlefcm.mrs" },
@@ -245,7 +238,7 @@ function main(config) {
   };
 
   config.rules = [
-    "RULE-SET,private,私有网络",
+    "RULE-SET,private,私有网络,no-resolve",
     "RULE-SET,private-ip,私有网络,no-resolve",
     "RULE-SET,AWAvenue-Ads,广告拦截",
     "DOMAIN,mtalk-dev.google.com,国内服务",
