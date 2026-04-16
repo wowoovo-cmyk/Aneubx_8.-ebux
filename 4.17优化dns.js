@@ -1,4 +1,4 @@
-function main(config) {
+Function main(config) {
   config["ipv6"] = false;
   config["external-controller"] = "127.0.0.1:9090";
   config["secret"] = "";
@@ -211,7 +211,7 @@ function main(config) {
     "anthropic": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/anthropic.mrs", url: GH + "/geosite/anthropic.mrs" },
     "google-gemini": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/google-gemini.mrs", url: GH + "/geosite/google-gemini.mrs" },
     "perplexity": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/perplexity.mrs", url: GH + "/geosite/perplexity.mrs" },
-    "OverseasAI": { type: "http", behavior: "domain", format: "text", interval: 604800, path: "./ruleset/OverseasAI.list", url: "https://raw.githubusercontent.com/viewer12/OverseasAI.list/main/rule/Clash/OverseasAI/OverseasAI.list" },
+    "OverseasAI": { type: "http", behavior: "classical", format: "text", interval: 604800, path: "./ruleset/OverseasAI.list", url: "https://raw.githubusercontent.com/viewer12/OverseasAI.list/main/rule/Clash/OverseasAI/OverseasAI.list" },
     "youtube": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/youtube.mrs", url: GH + "/geosite/youtube.mrs" },
     "netflix": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/netflix.mrs", url: GH + "/geosite/netflix.mrs" },
     "tiktok": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/tiktok.mrs", url: GH + "/geosite/tiktok.mrs" },
@@ -241,27 +241,7 @@ function main(config) {
     "RULE-SET,private,私有网络,no-resolve",
     "RULE-SET,private-ip,私有网络,no-resolve",
     "RULE-SET,AWAvenue-Ads,广告拦截",
-    "DOMAIN,mtalk-dev.google.com,国内服务",
-    "DOMAIN,mtalk-staging.google.com,国内服务",
-    "DOMAIN,67982.eu.cc,国内服务",
-    "DOMAIN,emby.67982.eu.cc,国内服务",
-    "DOMAIN,auto.dolby.dpdns.org,国内服务",
-    "DOMAIN,emby.4348663.xyz,国内服务",
-    "DOMAIN,emby.sadchicktv.com,国内服务",
-    "DOMAIN,saodu6.cn,国内服务",
-    "DOMAIN,2.66990000.xyz,国内服务",
-    "DOMAIN,xxm.kingemby.xyz,国内服务",
-    "DOMAIN,emo1.525778.xyz,国内服务",
-    "DOMAIN-KEYWORD,miraiemby.com,国内服务",
-    "DOMAIN-KEYWORD,tyemby.klplay,国内服务",
-    "DOMAIN-KEYWORD,dayimakk.sharepoint,国内服务",
-    "DOMAIN-KEYWORD,mtalk.google,国内服务",
-    "DOMAIN-KEYWORD,theluyuan.com,国内服务",
-    "DOMAIN-KEYWORD,ey.626258,国内服务",
-    "DOMAIN-SUFFIX,embymv.link,国内服务",
-    "DOMAIN-SUFFIX,emby.my,国内服务",
-    "DOMAIN-SUFFIX,8880080.xyz,国内服务",
-    "DOMAIN-SUFFIX,api-huacloud.dev,国内服务",
+    "RULE-SET,OverseasAI,AI 服务", // [已操作] 移至顶部，赋予极高优先级
     "RULE-SET,aliyun-drive,国内网盘",
     "RULE-SET,115,国内网盘",
     "RULE-SET,googlefcm,FCM 推送",
@@ -271,7 +251,6 @@ function main(config) {
     "RULE-SET,anthropic,AI 服务",
     "RULE-SET,google-gemini,AI 服务",
     "RULE-SET,perplexity,AI 服务",
-    "RULE-SET,OverseasAI,AI 服务",
     "RULE-SET,youtube,油管视频",
     "RULE-SET,netflix,奈飞",
     "RULE-SET,tiktok,TikTok",
@@ -322,6 +301,30 @@ function main(config) {
     "DOMAIN-SUFFIX,cn,国内服务",
     "RULE-SET,tld-not-cn,非中国",
     "RULE-SET,cncidr,国内服务,no-resolve",
+    
+    // [已操作] DOMAIN 块统一移动至此处，仅在匹配不到以上规则时生效
+    "DOMAIN,mtalk-dev.google.com,国内服务",
+    "DOMAIN,mtalk-staging.google.com,国内服务",
+    "DOMAIN,67982.eu.cc,国内服务",
+    "DOMAIN,emby.67982.eu.cc,国内服务",
+    "DOMAIN,auto.dolby.dpdns.org,国内服务",
+    "DOMAIN,emby.4348663.xyz,国内服务",
+    "DOMAIN,emby.sadchicktv.com,国内服务",
+    "DOMAIN,saodu6.cn,国内服务",
+    "DOMAIN,2.66990000.xyz,国内服务",
+    "DOMAIN,xxm.kingemby.xyz,国内服务",
+    "DOMAIN,emo1.525778.xyz,国内服务",
+    "DOMAIN-KEYWORD,miraiemby.com,国内服务",
+    "DOMAIN-KEYWORD,tyemby.klplay,国内服务",
+    "DOMAIN-KEYWORD,dayimakk.sharepoint,国内服务",
+    "DOMAIN-KEYWORD,mtalk.google,国内服务",
+    "DOMAIN-KEYWORD,theluyuan.com,国内服务",
+    "DOMAIN-KEYWORD,ey.626258,国内服务",
+    "DOMAIN-SUFFIX,embymv.link,国内服务",
+    "DOMAIN-SUFFIX,emby.my,国内服务",
+    "DOMAIN-SUFFIX,8880080.xyz,国内服务",
+    "DOMAIN-SUFFIX,api-huacloud.dev,国内服务",
+
     "MATCH,漏网之鱼"
   ];
 
