@@ -379,9 +379,9 @@ function main(config) {
     "DOMAIN-SUFFIX,cn,DIRECT",
     "RULE-SET,tld-not-cn,非中国",
     "RULE-SET,cncidr,DIRECT,no-resolve",
+    "GEOIP,CN,DIRECT,no-resolve",
     "MATCH,漏网之鱼"
   ];
 
   return config;
 }
-
