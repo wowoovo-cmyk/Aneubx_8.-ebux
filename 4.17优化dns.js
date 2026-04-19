@@ -159,7 +159,6 @@ function main(config) {
   const fullProxies = ["节点选择", "自动选择", "DIRECT", "REJECT", "香港", "台湾", "日本", "新加坡", "美国", "欧盟", "其他地区"];
   const regionProxies = ["香港", "台湾", "日本", "新加坡", "美国", "欧盟", "其他地区"];
 
-  // 移动端省电与防断流配置
   const testUrl = "http://www.gstatic.com/generate_204"; 
   const testInterval = 300; 
   const testTolerance = 50; 
@@ -198,7 +197,8 @@ function main(config) {
 
   var GH = "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo";
   config["rule-providers"] = {
-    "AWAvenue-Ads": { type: "http", behavior: "domain", format: "yaml", interval: 604800, path: "./ruleset/AWAvenue-Ads.yaml", url: "https://testingcf.jsdelivr.net/gh/TG-Twilight/AWAvenue-Ads-Rule@main/Filters/AWAvenue-Ads-Rule-Clash.yaml" },
+    // 修正 behavior 为 classical
+    "AWAvenue-Ads": { type: "http", behavior: "classical", format: "yaml", interval: 604800, path: "./ruleset/AWAvenue-Ads.yaml", url: "https://testingcf.jsdelivr.net/gh/TG-Twilight/AWAvenue-Ads-Rule@main/Filters/AWAvenue-Ads-Rule-Clash.yaml" },
     "gfw": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/gfw.mrs", url: GH + "/geosite/gfw.mrs" },
     "tld-not-cn": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/tld-not-cn.mrs", url: GH + "/geosite/tld-!cn.mrs" },
     "cncidr": { type: "http", behavior: "ipcidr", format: "mrs", interval: 604800, path: "./ruleset/cncidr.mrs", url: GH + "/geoip/cn.mrs" },
@@ -236,11 +236,41 @@ function main(config) {
     "epicgames": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/epicgames.mrs", url: GH + "/geosite/epicgames.mrs" },
     "aliyun-drive": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/aliyun-drive.mrs", url: GH + "/geosite/aliyun.mrs" },
     "115": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/115.mrs", url: GH + "/geosite/115.mrs" },
+    
+    // 自定义国内直连规则集
+    "bilibili": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/bilibili.mrs", url: GH + "/geosite/bilibili.mrs" },
+    "apple-cn": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/apple-cn.mrs", url: GH + "/geosite/apple-cn.mrs" },
+    "microsoft-cn": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/microsoft-cn.mrs", url: GH + "/geosite/microsoft@cn.mrs" },
+    "steam-cn": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/steam-cn.mrs", url: GH + "/geosite/steam@cn.mrs" },
+    "netease": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/netease.mrs", url: GH + "/geosite/netease.mrs" },
+    "alibaba": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/alibaba.mrs", url: GH + "/geosite/alibaba.mrs" },
+    "jd": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/jd.mrs", url: GH + "/geosite/jd.mrs" },
+    "xiaohongshu": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/xiaohongshu.mrs", url: GH + "/geosite/xiaohongshu.mrs" },
+    "weibo": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/weibo.mrs", url: GH + "/geosite/weibo.mrs" },
+    "xunlei": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/xunlei.mrs", url: GH + "/geosite/xunlei.mrs" },
+    "tencent": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/tencent.mrs", url: GH + "/geosite/tencent.mrs" },
+    "baidu": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/baidu.mrs", url: GH + "/geosite/baidu.mrs" },
+    "iqiyi": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/iqiyi.mrs", url: GH + "/geosite/iqiyi.mrs" },
+    "kuaishou": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/kuaishou.mrs", url: GH + "/geosite/kuaishou.mrs" }
   };
+  
 
   config.rules = [
     "RULE-SET,private,私有网络,no-resolve",
     "RULE-SET,private-ip,私有网络,no-resolve",
+    
+    // 强制拦截高危 P2P 与测速，防止机场封号或流量耗尽
+    "DST-PORT,6881-6889,DIRECT",
+    "DOMAIN-KEYWORD,tracker,DIRECT",
+    "DOMAIN-KEYWORD,announce,DIRECT",
+    "DOMAIN-KEYWORD,torrent,DIRECT",
+    "DOMAIN-SUFFIX,speedtest.net,DIRECT",
+    "DOMAIN-SUFFIX,ooklaserver.net,DIRECT",
+    
+    // 强制拦截网盘底层下载 CDN 关键字
+    "DOMAIN-KEYWORD,baidupcs,DIRECT",
+    "DOMAIN-KEYWORD,quark,DIRECT",
+
     "RULE-SET,AWAvenue-Ads,广告拦截",
     "RULE-SET,OverseasAI,AI 服务",
     
@@ -269,6 +299,23 @@ function main(config) {
 
     "RULE-SET,aliyun-drive,国内网盘",
     "RULE-SET,115,国内网盘",
+
+    // 高耗流大厂应用全量直连分流
+    "RULE-SET,bilibili,DIRECT",
+    "RULE-SET,apple-cn,DIRECT",
+    "RULE-SET,microsoft-cn,DIRECT",
+    "RULE-SET,steam-cn,DIRECT",
+    "RULE-SET,netease,DIRECT",
+    "RULE-SET,alibaba,DIRECT",
+    "RULE-SET,jd,DIRECT",
+    "RULE-SET,xiaohongshu,DIRECT",
+    "RULE-SET,weibo,DIRECT",
+    "RULE-SET,xunlei,DIRECT",
+    "RULE-SET,tencent,DIRECT",
+    "RULE-SET,baidu,DIRECT",
+    "RULE-SET,iqiyi,DIRECT",
+    "RULE-SET,kuaishou,DIRECT",
+
     "RULE-SET,googlefcm,FCM 推送",
     "RULE-SET,googlefcm@!cn,FCM 推送",
     "RULE-SET,category-ai-chat-!cn,AI 服务",
@@ -291,17 +338,17 @@ function main(config) {
     "IP-CIDR,91.108.12.0/22,美国,no-resolve",
     "IP-CIDR,149.154.172.0/22,美国,no-resolve",
     "IP-CIDR6,2001:b28:f23d::/48,美国,no-resolve",
-    "IP-CIDR,5.28.192.0/18,香港,no-resolve",
-    "IP-CIDR,91.105.192.0/23,香港,no-resolve",
-    "IP-CIDR,91.108.4.0/22,香港,no-resolve",
-    "IP-CIDR,91.108.8.0/22,香港,no-resolve",
-    "IP-CIDR,91.108.56.0/22,香港,no-resolve",
-    "IP-CIDR,95.161.64.0/20,香港,no-resolve",
-    "IP-CIDR,109.239.140.0/24,香港,no-resolve",
-    "IP-CIDR,149.154.160.0/21,香港,no-resolve",
-    "IP-CIDR,185.76.151.0/24,香港,no-resolve",
-    "IP-CIDR6,2001:67c:4e8::/48,香港,no-resolve",
-    "IP-CIDR6,2a0a:f280:203::/48,香港,no-resolve",
+    "IP-CIDR,5.28.192.0/18,欧盟,no-resolve",
+    "IP-CIDR,91.105.192.0/23,欧盟,no-resolve",
+    "IP-CIDR,91.108.4.0/22,欧盟,no-resolve",
+    "IP-CIDR,91.108.8.0/22,欧盟,no-resolve",
+    "IP-CIDR,91.108.56.0/22,欧盟,no-resolve",
+    "IP-CIDR,95.161.64.0/20,欧盟,no-resolve",
+    "IP-CIDR,109.239.140.0/24,欧盟,no-resolve",
+    "IP-CIDR,149.154.160.0/21,欧盟,no-resolve",
+    "IP-CIDR,185.76.151.0/24,欧盟,no-resolve",
+    "IP-CIDR6,2001:67c:4e8::/48,欧盟,no-resolve",
+    "IP-CIDR6,2a0a:f280:203::/48,欧盟,no-resolve",
     
     "RULE-SET,telegram,电报消息",
     "RULE-SET,twitter,社交平台",
@@ -324,15 +371,17 @@ function main(config) {
     "IP-ASN,44907,新加坡,no-resolve",
     "IP-ASN,62014,新加坡,no-resolve",
     "IP-ASN,59930,美国,no-resolve",
-    "IP-ASN,62041,香港,no-resolve",
-    "IP-ASN,211157,香港,no-resolve",
+    "IP-ASN,62041,欧盟,no-resolve",
+    "IP-ASN,211157,欧盟,no-resolve",
     
-    "RULE-SET,geolocation-cn,国内服务",
-    "DOMAIN-SUFFIX,cn,国内服务",
+    // 国内泛匹配安全兜底，锁定为 DIRECT
+    "RULE-SET,geolocation-cn,DIRECT",
+    "DOMAIN-SUFFIX,cn,DIRECT",
     "RULE-SET,tld-not-cn,非中国",
-    "RULE-SET,cncidr,国内服务,no-resolve",
+    "RULE-SET,cncidr,DIRECT,no-resolve",
     "MATCH,漏网之鱼"
   ];
 
   return config;
 }
+
