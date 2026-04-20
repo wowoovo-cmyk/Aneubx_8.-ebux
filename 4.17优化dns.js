@@ -198,8 +198,9 @@ function main(config) {
   var GH = "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo";
   config["rule-providers"] = {
     // 修正 behavior 为 classical
+    "Anti-AD": { type: "http", behavior: "damain", format: "yaml", interval: 86400, path: "./ruleset/anti_ad.yaml", url: "https://raw.githubusercontent.com/privacy-protection-tools/anti-AD/master/anti-ad-clash.yaml" },
     "AdBlock-MRS": { type: "http", behavior: "classical", format: "mrs", interval: 604800, path: "./ruleset/adblock_reject.mrs", url: "https://raw.githubusercontent.com/REIJI007/AdBlock_Rule_For_Clash/main/adblock_reject.mrs" },
-    "AWAvenue-Ads": { type: "http", behavior: "classical", format: "yaml", interval: 604800, path: "./ruleset/AWAvenue-Ads.yaml", url: "https://testingcf.jsdelivr.net/gh/TG-Twilight/AWAvenue-Ads-Rule@main/Filters/AWAvenue-Ads-Rule-Clash.yaml" },
+    "AWAvenue-Ads": { type: "http", behavior: "domain", format: "yaml", interval: 604800, path: "./ruleset/AWAvenue-Ads.yaml", url: "https://testingcf.jsdelivr.net/gh/TG-Twilight/AWAvenue-Ads-Rule@main/Filters/AWAvenue-Ads-Rule-Clash.yaml" },
     "gfw": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/gfw.mrs", url: GH + "/geosite/gfw.mrs" },
     "tld-not-cn": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/tld-not-cn.mrs", url: GH + "/geosite/tld-!cn.mrs" },
     "cncidr": { type: "http", behavior: "ipcidr", format: "mrs", interval: 604800, path: "./ruleset/cncidr.mrs", url: GH + "/geoip/cn.mrs" },
@@ -272,6 +273,7 @@ function main(config) {
     "DOMAIN-KEYWORD,baidupcs,DIRECT",
     "DOMAIN-KEYWORD,quark,DIRECT",
     
+    "RULE-SET,Anti-AD,广告拦截",
     "RULE-SET,AdBlock-MRS,广告拦截",
     "RULE-SET,AWAvenue-Ads,广告拦截",
     "RULE-SET,OverseasAI,AI 服务",
@@ -387,4 +389,3 @@ function main(config) {
 
   return config;
 }
-
