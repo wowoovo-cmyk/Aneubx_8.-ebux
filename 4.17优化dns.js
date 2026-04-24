@@ -210,15 +210,7 @@ function main(config) {
     "apple-cn": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/apple-cn.mrs", url: GH + "/geosite/apple-cn.mrs" },
     "microsoft-cn": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/microsoft-cn.mrs", url: GH + "/geosite/microsoft@cn.mrs" },
     "steam-cn": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/steam-cn.mrs", url: GH + "/geosite/steam@cn.mrs" },
-    "netease": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/netease.mrs", url: GH + "/geosite/netease.mrs" },
-    "alibaba": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/alibaba.mrs", url: GH + "/geosite/alibaba.mrs" },
-    "jd": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/jd.mrs", url: GH + "/geosite/jd.mrs" },
-    "xiaohongshu": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/xiaohongshu.mrs", url: GH + "/geosite/xiaohongshu.mrs" },
-    "xunlei": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/xunlei.mrs", url: GH + "/geosite/xunlei.mrs" },
-    "tencent": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/tencent.mrs", url: GH + "/geosite/tencent.mrs" },
-    "baidu": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/baidu.mrs", url: GH + "/geosite/baidu.mrs" },
-    "iqiyi": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/iqiyi.mrs", url: GH + "/geosite/iqiyi.mrs" },
-    "kuaishou": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/kuaishou.mrs", url: GH + "/geosite/kuaishou.mrs" }
+    "cn": { type: "http", behavior: "domain", format: "mrs", interval: 604800, path: "./ruleset/cn.mrs", url: GH + "/geosite/cn.mrs" },
   };
   
   config.rules = [
@@ -232,6 +224,7 @@ function main(config) {
     "DOMAIN-KEYWORD,quark,DIRECT",
     "RULE-SET,googlefcm,FCM 推送",
     "RULE-SET,googlefcm@!cn,FCM 推送",
+    "RULE-SET,OverseasAI,AI 服务",
     "RULE-SET,category-ai-chat-!cn,AI 服务",
     "RULE-SET,openai,AI 服务",
     "RULE-SET,anthropic,AI 服务",
@@ -239,7 +232,6 @@ function main(config) {
     "RULE-SET,perplexity,AI 服务",
     "RULE-SET,Anti-AD,广告拦截",
     "RULE-SET,AWAvenue-Ads,广告拦截",
-    "RULE-SET,OverseasAI,AI 服务",
     "DOMAIN,67982.eu.cc,国内服务",
     "DOMAIN,emby.67982.eu.cc,国内服务",
     "DOMAIN,auto.dolby.dpdns.org,国内服务",
@@ -264,15 +256,6 @@ function main(config) {
     "RULE-SET,apple-cn,DIRECT",
     "RULE-SET,microsoft-cn,DIRECT",
     "RULE-SET,steam-cn,DIRECT",
-    "RULE-SET,netease,DIRECT",
-    "RULE-SET,alibaba,DIRECT",
-    "RULE-SET,jd,DIRECT",
-    "RULE-SET,xiaohongshu,DIRECT",
-    "RULE-SET,xunlei,DIRECT",
-    "RULE-SET,tencent,DIRECT",
-    "RULE-SET,baidu,DIRECT",
-    "RULE-SET,iqiyi,DIRECT",
-    "RULE-SET,kuaishou,DIRECT",
     "RULE-SET,youtube,油管视频",
     "RULE-SET,netflix,奈飞",
     "RULE-SET,tiktok,TikTok",
@@ -317,9 +300,11 @@ function main(config) {
     "RULE-SET,geolocation-cn,DIRECT",
     "DOMAIN-SUFFIX,cn,DIRECT",
     "RULE-SET,tld-not-cn,非中国",
+    "RULE-SET,cn,DIRECT",
     "RULE-SET,cncidr,DIRECT",
     "MATCH,漏网之鱼"
   ];
 
   return config;
 }
+
